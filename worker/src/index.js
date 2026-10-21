@@ -194,7 +194,7 @@ function decodeEntities(s) {
 }
 
 function tag(xml, name) {
-  const m = xml.match(new RegExp(`<${name}[^>]*>([\\s\\S]*?)</${name}>`));
+  const m = xml.match(new RegExp(`<${name.replace(":", "\\:")}[^>]*>([\\s\\S]*?)</${name.replace(":", "\\:")}>`));
   return m ? decodeEntities(m[1]).trim() : "";
 }
 
@@ -223,14 +223,69 @@ function parseRSS(xml) {
   return items;
 }
 
+const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
+const PERIOD_MS = { "1d": 86400e3, "3d": 3 * 86400e3, "7d": 7 * 86400e3 };
+
+// ดึงข่าว: ลอง Google News ก่อน ถ้าถูกปฏิเสธจะเปลี่ยนไปใช้ Bing News อัตโนมัติ
 async function gnews(q, period, hl = "th") {
+  const tries = [() => fetchGoogle(q, period, hl), () => fetchBing(q, period, hl)];
+  let lastErr;
+  for (const t of tries) {
+    try {
+      const items = await t();
+      if (items.length) return items;
+    } catch (e) { lastErr = e; }
+  }
+  if (lastErr) throw lastErr;
+  return [];
+}
+
+async function fetchGoogle(q, period, hl) {
   const loc = hl === "en" ? "hl=en-US&gl=US&ceid=US:en" : "hl=th&gl=TH&ceid=TH:th";
   const url = q
     ? `https://news.google.com/rss/search?q=${encodeURIComponent(`${q} when:${period}`)}&${loc}`
     : `https://news.google.com/rss?${loc}`;
-  const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 GAY-News" } });
-  if (!res.ok) throw new Error(`ดึงข่าวไม่สำเร็จ (${res.status})`);
+  const res = await fetch(url, { headers: { "User-Agent": UA, "Accept": "application/rss+xml,application/xml;q=0.9,*/*;q=0.8" } });
+  if (!res.ok) throw new Error(`ดึงข่าวไม่สำเร็จ (Google ${res.status})`);
   return parseRSS(await res.text());
+}
+
+async function fetchBing(q, period, hl) {
+  const interval = period === "1d" ? "7" : "8"; // 7 = 24 ชม., 8 = 7 วัน
+  const mkt = hl === "en" ? "en-US" : "th-TH";
+  const query = q || (hl === "en" ? "top news" : "ข่าว");
+  const url = `https://www.bing.com/news/search?q=${encodeURIComponent(query)}&format=rss&setmkt=${mkt}&setlang=${mkt}&qft=${encodeURIComponent(`interval="${interval}"`)}`;
+  const res = await fetch(url, { headers: { "User-Agent": UA, "Accept": "application/rss+xml,application/xml;q=0.9,*/*;q=0.8" } });
+  if (!res.ok) throw new Error(`ดึงข่าวไม่สำเร็จ (Bing ${res.status})`);
+  const since = Date.now() - (PERIOD_MS[period] || PERIOD_MS["7d"]);
+  return parseBing(await res.text()).filter(it => !Date.parse(it.date) || Date.parse(it.date) >= since);
+}
+
+function parseBing(xml) {
+  const items = [];
+  const re = /<item>([\s\S]*?)<\/item>/g;
+  let m;
+  while ((m = re.exec(xml))) {
+    const it = m[1];
+    let link = tag(it, "link");
+    try {
+      const u = new URL(link);
+      const real = u.searchParams.get("url");
+      if (real) link = real;
+    } catch {}
+    if (!/^https?:\/\//.test(link)) continue;
+    let source = tag(it, "News:Source");
+    if (!source) { try { source = new URL(link).hostname.replace(/^www\./, ""); } catch {} }
+    items.push({
+      title: clean(tag(it, "title"), 220),
+      source: clean(source, 60),
+      link,
+      date: tag(it, "pubDate"),
+      sources: 1,
+      related: clean(tag(it, "description").replace(/<[^>]+>/g, " ").replace(/\s+/g, " "), 400),
+    });
+  }
+  return items;
 }
 
 /* ---------------- ข่าววันนี้ ---------------- */
