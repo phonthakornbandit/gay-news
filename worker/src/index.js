@@ -148,28 +148,43 @@ async function gemini(env, parts, maxTokens = 8192) {
   if (!env.GEMINI_API_KEY) throw new Error("ยังไม่ได้ตั้ง GEMINI_API_KEY ใน Cloudflare");
   const limit = Number(env.DAILY_LIMIT) || 300;
   if ((Number(await env.NEWS.get(`usage:${today()}`)) || 0) >= limit) throw new Error(`ใช้ AI ครบ ${limit} ครั้งของวันนี้แล้ว (เพดานกันใช้เกิน) ลองใหม่พรุ่งนี้`);
-  const model = env.MODEL || DEFAULT_MODEL;
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
-      body: JSON.stringify({
-        contents: [{ parts }],
-        generationConfig: { responseMimeType: "application/json", maxOutputTokens: maxTokens, temperature: 0.3 },
-      }),
+  // รุ่นหลัก + รุ่นสำรอง (ตั้งได้ใน Cloudflare: MODEL และ MODEL_FALLBACK คั่นด้วย ,)
+  const models = [env.MODEL || DEFAULT_MODEL, ...String(env.MODEL_FALLBACK || "").split(",").map(x => x.trim()).filter(Boolean)];
+  let lastMsg = "";
+  for (const model of models) {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
+          body: JSON.stringify({
+            contents: [{ parts }],
+            generationConfig: { responseMimeType: "application/json", maxOutputTokens: maxTokens, temperature: 0.3 },
+          }),
+        }
+      );
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        await bumpUsage(env);
+        const text = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || "").join("");
+        if (!text) throw new Error("ไม่ได้รับผลจาก AI (คลิปหรือข่าวอาจถูกจำกัด)");
+        try {
+          return JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, ""));
+        } catch {
+          throw new Error("AI ตอบกลับมาไม่ครบ ลองกดใหม่อีกครั้ง");
+        }
+      }
+      lastMsg = (data.error && data.error.message) || `Gemini ตอบกลับผิดพลาด (${res.status})`;
+      const busy = res.status === 503 || res.status === 500 || /high demand|overloaded|unavailable/i.test(lastMsg);
+      const quota = res.status === 429 || /quota|RESOURCE_EXHAUSTED/i.test(lastMsg);
+      if (busy && attempt < 2) { await new Promise(r => setTimeout(r, 1500 * (attempt + 1) ** 2)); continue; }
+      if (busy || quota || res.status === 404) break; // ลองรุ่นสำรองถัดไป
+      throw new Error(lastMsg);
     }
-  );
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error((data.error && data.error.message) || `Gemini ตอบกลับผิดพลาด (${res.status})`);
-  await bumpUsage(env);
-  const text = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || "").join("");
-  if (!text) throw new Error("ไม่ได้รับผลจาก AI (คลิปหรือข่าวอาจถูกจำกัด)");
-  try {
-    return JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, ""));
-  } catch {
-    throw new Error("AI ตอบกลับมาไม่ครบ ลองกดใหม่อีกครั้ง");
   }
+  if (/high demand|overloaded|unavailable/i.test(lastMsg)) throw new Error("ตอนนี้ AI ของ Google มีคนใช้เยอะมาก (ชั่วคราว) รอสัก 1–2 นาทีแล้วกดลองใหม่");
+  throw new Error(lastMsg);
 }
 
 async function bumpUsage(env) {

@@ -398,7 +398,7 @@ function storyView(){
     <b style="flex:1;font-size:17px">${esc(S.storyQ)}</b>
     ${s&&!s.error?`<button class="icon-btn" id="storyRefresh" aria-label="${esc(t.refresh)}">${svg("refresh",20)}</button>`:""}</div>`;
   if (!s) return head + loading(t.loadingStory);
-  if (s.error) return head + `<div class="err">${esc(s.error)}</div><button class="btn ghost" id="unfollowBtn">${esc(t.unfollow)}</button>`;
+  if (s.error) return head + `<div class="err">${esc(s.error)}</div><button class="btn" id="storyRetry">${esc(t.retry)}</button><button class="btn ghost" id="unfollowBtn">${esc(t.unfollow)}</button>`;
   const W = t.W;
   return head + `
   <div style="display:flex;flex-direction:column;gap:6px">
@@ -428,7 +428,7 @@ function videoView(){
   const t = L(), v = S.vResult;
   let res = "";
   if (S.busy) res = loading(t.loadingVideo);
-  else if (S.err) res = errBox();
+  else if (S.err) res = errBox() + `<button class="btn ghost small" id="vGo2">${esc(t.retry)}</button>`;
   else if (v) {
     const thumb = `<a class="yt" href="${safeUrl(v.url)}" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/${esc(v.id)}/hqdefault.jpg" alt=""></a>`;
     const body = v.mode === "full"
@@ -513,9 +513,10 @@ document.addEventListener("click", async e => {
     case "addFollow": promptFollow(""); break;
     case "backFollow": S.storyQ = null; S.story = null; render(); break;
     case "storyRefresh": openStory(S.storyQ, true); break;
+    case "storyRetry": openStory(S.storyQ); break;
     case "unfollowBtn": try { S.follows = (await api("/follow/remove", { q: S.storyQ })).follows; } catch(err){ toast(err.message); }
       S.storyQ = null; S.story = null; render(); break;
-    case "vGo": { const u = $("yt").value.trim(); if (u) runVideo(u, S.vMode); break; }
+    case "vGo": case "vGo2": { const u = $("yt").value.trim(); if (u) runVideo(u, S.vMode); break; }
     case "vCopy": { const v = S.vResult; const txt = v.mode === "full"
         ? v.sections.map(s => `[${s.start}] ${s.title}\n` + s.lines.map(l => `${l.speaker}: ${l.text}`).join("\n")).join("\n\n")
         : `${v.headline}\n\n` + (v.summary||[]).map(s=>"• "+s).join("\n") + "\n\n" + (v.key_moments||[]).map(k=>`${k.time} ${k.point}`).join("\n");
