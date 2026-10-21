@@ -3,7 +3,7 @@
 // ตัวแปรเสริม (ไม่บังคับ): MODEL — ชื่อรุ่น Gemini, DAILY_LIMIT — จำกัดจำนวนครั้งเรียก AI ต่อวัน (ค่าเริ่มต้น 300)
 // ไม่มีระบบรหัสผ่าน: รับเฉพาะคำขอจากหน้าเว็บ GitHub Pages ของเจ้าของ และมีเพดานการใช้ AI ต่อวัน
 
-const DEFAULT_MODEL = "gemini-2.5-flash";
+const DEFAULT_MODEL = "gemini-3.8-flash";
 
 const ALLOWED_ORIGINS = ["https://phonthakornbandit.github.io"];
 let CORS = {
