@@ -375,6 +375,122 @@ assert "quotaBox" not in h, "quota"
 # recommendation prompt tab not used
 rep('''const names = { news: t.pNews, recommend: t.pRec, story: t.pStory, video: t.pVideo };''', '''const names = { news: t.pNews, story: t.pStory, video: t.pVideo };''')
 
+# ================= ค้นข่าวผ่าน Parallel Search (connector) =================
+rep('const LENGTH_RULE = {', r"""let MCP = null;
+const mcpP = (async () => { try { MCP = await window.claude?.use?.("mcp"); } catch(e){ MCP = null; } })();
+const SEARCH_SERVER = "Parallel Search";
+const SID = "gay-news-artifact-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 12);
+const TH_MONTHS = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+function todayTh(){ const d = new Date(); return `${d.getDate()} ${TH_MONTHS[d.getMonth()]} ${d.getFullYear() + 543}`; }
+function monthTh(){ const d = new Date(); return `${TH_MONTHS[d.getMonth()]} ${d.getFullYear() + 543}`; }
+const PERIOD_TH = { "1d": "24 ชั่วโมงที่ผ่านมา", "3d": "3 วันที่ผ่านมา", "7d": "7 วันที่ผ่านมา" };
+function hostOf(u){ try { return new URL(u).hostname.replace(/^www\./, ""); } catch(e){ return ""; } }
+async function webSearch(objective, queries){
+  await mcpP;
+  if (!MCP) throw new Error(L().noSearch);
+  try {
+    const r = await MCP.callTool(SEARCH_SERVER, "web_search", { objective, search_queries: queries.slice(0, 3), session_id: SID, model_name: "claude-artifact-gay-news" }, { cache: { staleTime: 300000 } });
+    const pl = r && r.payload;
+    const res = (pl && Array.isArray(pl.results)) ? pl.results : [];
+    return res.map(x => ({ title: clip(x.title, 200), url: String(x.url || ""), date: clip(x.publish_date || "", 30), text: clip((x.excerpts || []).join(" "), 1500) }))
+      .filter(x => /^https?:\/\//.test(x.url));
+  } catch(e){
+    const c = e && e.code;
+    if (c === "server_not_connected" || c === "server_not_found") throw new Error("ยังไม่ได้เชื่อม Parallel Search: ไปที่ claude.ai › Settings › Connectors แล้วเพิ่ม Parallel Search");
+    if (c === "not_in_manifest") throw new Error("ยังไม่ได้อนุญาตให้หน้านี้ใช้ Parallel Search เปิดหน้านี้ใหม่แล้วกดอนุญาต");
+    if (c === "needs_reauth") throw new Error("Parallel Search ต้องเชื่อมใหม่: claude.ai › Settings › Connectors");
+    if (c === "selection_required") throw new Error("มี Parallel Search มากกว่า 1 ตัว ให้เลือกตัวที่จะใช้ในหน้าต่างที่ขึ้นมา");
+    if (c === "not_granted" || c === "capability_disabled" || c === "capability_removed") throw new Error(L().noSearch);
+    if (c === "tool_error") throw new Error("Parallel Search ตอบกลับผิดพลาด: " + (e.message || ""));
+    throw new Error("ค้นข่าวไม่สำเร็จชั่วคราว ลองใหม่อีกครั้ง");
+  }
+}
+function freshEnough(x, period){
+  const t = Date.parse(x.date); if (!x.date || !t) return true;
+  const days = { "1d": 2, "3d": 4, "7d": 8 }[period] || 8;
+  return Date.now() - t <= days * 86400e3;
+}
+async function searchNews(terms, period){
+  let firstErr = null;
+  const lists = await Promise.all(terms.slice(0, 6).map(t =>
+    webSearch(`ข่าวล่าสุดเกี่ยวกับ "${t}" ใน${PERIOD_TH[period] || "สัปดาห์นี้"} (วันนี้คือ ${todayTh()}) จากสำนักข่าวที่น่าเชื่อถือ เน้นข่าวใหม่ ไม่เอาข่าวเก่า`,
+      [`ข่าว ${t} ล่าสุด`, `${t} ${monthTh()}`, `${t} news ${new Date().getFullYear()}`])
+      .then(r => r.map(x => ({ ...x, topic: t })))
+      .catch(e => { firstErr = firstErr || e; return []; })));
+  const seen = new Set(), out = [];
+  for (const list of lists) for (const x of list){ if (seen.has(x.url) || !freshEnough(x, period)) continue; seen.add(x.url); out.push(x); }
+  if (!out.length && firstErr) throw firstErr;
+  return out;
+}
+function resultsToText(list){
+  return list.map((x, i) => `[${i + 1}] ${x.title}\nหัวข้อที่ค้น: ${x.topic || "-"}\nURL: ${x.url}\nวันที่เผยแพร่: ${x.date || "ไม่ระบุ"}\nเว็บ: ${hostOf(x.url)}\n${x.text}`).join("\n\n");
+}
+const LENGTH_RULE = {""")
+
+rep(r"""      const text = String(data.text || "").trim();
+      if (!text) throw new Error(L().pasteNewsPh);
+      if (text.length < 60 && !/https?:\/\//.test(text) && !text.includes("\n")) throw new Error(L().needText);
+      const topics = (data.topics || []).slice(0, 12);""", r"""      let text = String(data.text || "").trim();
+      let topics = (data.topics || []).slice(0, 12);
+      const period = ["1d","3d","7d"].includes(data.period) ? data.period : "1d";
+      let fromSearch = false;
+      if (!text || (text.length < 60 && !/https?:\/\//.test(text) && !text.includes("\n"))){
+        const terms = text ? [text] : topics;
+        if (!terms.length) throw new Error("เลือกหัวข้อ หรือพิมพ์คำค้นก่อน");
+        if (text) topics = [text, ...topics];
+        const found = await searchNews(terms, period);
+        if (!found.length) throw new Error("ไม่พบข่าวใหม่ในช่วงเวลานี้ ลองเลือกช่วงเวลาให้ยาวขึ้น หรือเปลี่ยนคำค้น");
+        text = resultsToText(found.slice(0, 40));
+        fromSearch = true;
+      }""")
+rep(r"""ใช้เฉพาะข้อมูลในข้อความที่วาง ห้ามแต่งข้อเท็จจริง ตัวเลข ชื่อ หรือวันที่ที่ไม่มีในข้อความ""",
+    r"""ใช้เฉพาะข้อมูลในข้อความที่วาง ห้ามแต่งข้อเท็จจริง ตัวเลข ชื่อ หรือวันที่ที่ไม่มีในข้อความ${fromSearch ? `
+ข้อความนี้เป็นผลค้นหาเว็บ วันนี้คือ ${todayTh()} — ตัดผลที่เป็นข่าวเก่ากว่า${PERIOD_TH[period]}ทิ้ง (ดูวันที่เผยแพร่และเนื้อหา) ตัดหน้าที่ไม่ใช่ข่าว (เช่น วิกิพีเดีย หน้ารวมแท็ก) ทิ้ง
+link ให้ใช้ URL ของผลนั้น source ให้ใช้ชื่อสำนักข่าว (ดูจากชื่อเว็บ) date ให้ใช้วันที่เผยแพร่` : ""}""")
+rep(r"""        source: clip(x.source, 60), link: /^https?:\/\//.test(x.link || "") ? x.link : "", date: clip(x.date, 60), sources: 1,""",
+    r"""        source: clip(x.source || hostOf(x.link), 60), link: /^https?:\/\//.test(x.link || "") ? x.link : "", date: clip(x.date, 60), sources: 1,""")
+rep(r"""      if (!items.length) throw new Error("ไม่พบข่าวในข้อความที่วาง");""",
+    r"""      if (!items.length) throw new Error(fromSearch ? "ไม่พบข่าวใหม่ที่ตรงกับช่วงเวลานี้ ลองเลือกช่วงเวลาให้ยาวขึ้น" : "ไม่พบข่าวในข้อความที่วาง");""")
+rep(r"""      if (!st.texts.length) return { empty: true };""", r"""      if (!data.add && (data.refresh || !st.texts.length)){
+        try {
+          const found = await searchNews([data.q], "7d");
+          const seen = new Set(st.urls || []);
+          const fresh = found.filter(x => !seen.has(x.url)).slice(0, 12);
+          if (fresh.length){
+            st.texts.push({ text: resultsToText(fresh), added: new Date().toISOString() });
+            st.urls = [...seen, ...fresh.map(x => x.url)].slice(-300);
+            st.texts = st.texts.slice(-15);
+            st.result = null;
+          }
+        } catch(e){ if (!st.texts.length) throw e; }
+      }
+      if (!st.texts.length) return { empty: true };""")
+rep(r"""รวมเป็นเรื่องเดียว ใช้เฉพาะข้อมูลที่ให้มา""", r"""วันนี้คือ ${todayTh()} บางชิ้นเป็นผลค้นหาเว็บ ให้ข้ามหน้าที่ไม่ใช่ข่าวและข่าวที่ไม่เกี่ยวกับเรื่องนี้
+รวมเป็นเรื่องเดียว ใช้เฉพาะข้อมูลที่ให้มา""")
+
+# home: keep period + new wording
+rep(r"""  <div style="display:flex;flex-direction:column;gap:6px"><label class="label" for="newsText">${esc(t.pasteNews)}</label>""",
+    r"""  <div style="display:flex;flex-direction:column;gap:8px"><span class="label">${esc(t.period)}</span>${seg("period",[["1d","d1"],["3d","d3"],["7d","d7"]])}</div>
+  <div style="display:flex;flex-direction:column;gap:6px"><label class="label" for="newsText">${esc(t.pasteNews)}</label>""")
+rep(r"""{ topics: p.topics, length: p.length, text: S.newsText }""", r"""{ topics: p.topics, length: p.length, period: p.period, text: S.newsText }""")
+rep(r"""if (!String(S.newsText||"").trim()){ toast(L().pasteNewsPh); break; } loadFeed(false); break; }""", r"""loadFeed(false); break; }""")
+# strings
+rep(r"""pasteNews: "วางข่าว ลิงก์ หรือบทความ", pasteNewsPh: "วางเนื้อข่าวหลายชิ้นได้ในครั้งเดียว เช่น คัดลอกจากเว็บข่าว แอปข่าว หรือโพสต์",""",
+    r"""pasteNews: "คำค้น หรือวางเนื้อข่าว (ไม่บังคับ)", pasteNewsPh: "เช่น ประท้วง, ค่าแรง หรือวางเนื้อข่าวที่คัดลอกมา",
+    noSearch: "หน้านี้ค้นเว็บไม่ได้ในตอนนี้ ให้วางเนื้อข่าวแทน (ต้องเปิดใน claude.ai และเชื่อม Parallel Search)",""")
+rep(r"""pasteHint: "Claude จะแยกเป็นข่าวทีละชิ้น จัดตามหัวข้อที่เลือก และสรุปจากข้อความที่วางเท่านั้น",""",
+    r"""pasteHint: "เว้นว่าง = ค้นข่าวล่าสุดตามหัวข้อที่เลือก · พิมพ์คำค้น = ค้นเฉพาะเรื่องนั้น · วางเนื้อข่าว = สรุปจากข้อความที่วาง",""")
+rep(r"""pasteNews: "Paste news, links or articles", pasteNewsPh: "Paste several articles at once, copied from news sites, apps or posts",""",
+    r"""pasteNews: "Keyword or pasted news (optional)", pasteNewsPh: "e.g. protest, minimum wage, or paste article text",
+    noSearch: "Web search isn't available here right now. Paste the article text instead (open in claude.ai with Parallel Search connected)",""")
+rep(r"""pasteHint: "Claude splits them into stories, sorts them by your topics and summarizes only what you pasted",""",
+    r"""pasteHint: "Empty = latest news for your topics · keyword = search that story · pasted text = summarize what you pasted",""")
+rep(r"""loadingNews: "Claude กำลังแยกและสรุปข่าว…\nประมาณ 20–60 วินาที""", r"""loadingNews: "กำลังค้นข่าวและให้ Claude สรุป…\nประมาณ 30–90 วินาที""")
+rep(r"""storyEmpty: "ยังไม่มีข่าวในเรื่องนี้\nวางข่าวด้านล่างเพื่อเริ่มสรุป",""", r"""storyEmpty: "ยังหาข่าวของเรื่องนี้ไม่เจอ\nกดอัปเดตอีกครั้งภายหลัง หรือวางข่าวด้านล่าง",""")
+rep(r"""loadingStory: "Claude กำลังเรียบเรียงเรื่องนี้…""", r"""loadingStory: "กำลังค้นข่าวของเรื่องนี้และเรียบเรียง…""")
+rep(r"""${s&&!s.error&&!s.empty?`<button class="icon-btn" id="storyRefresh" aria-label="${esc(t.rebuild)}">${svg("refresh",20)}</button>`:""}</div>""",
+    r"""${s&&!s.error?`<button class="icon-btn" id="storyRefresh" aria-label="${esc(t.rebuild)}">${svg("refresh",20)}</button>`:""}</div>""")
+
 assert "fetch(" not in h, "network call left"
 assert "i.ytimg.com" not in h
 open(OUT, "w", encoding="utf-8").write(h)

@@ -168,9 +168,9 @@ const T = {
     why: "ทำไมแนะนำ", outside: "นอกความสนใจ",
     tabNews: "ข่าววันนี้", tabFollow: "ติดตาม", tabVideo: "สรุปวิดีโอ",
     yourNews: "ข่าวของคุณ", overview: "ภาพรวมวันนี้ · สรุปโดย AI", all: "ทั้งหมด", done: "อ่านครบแล้ว",
-    by: n => `รายงานโดย ${n} สำนัก`, loadingNews: "Claude กำลังแยกและสรุปข่าว…\nประมาณ 20–60 วินาที",
+    by: n => `รายงานโดย ${n} สำนัก`, loadingNews: "กำลังค้นข่าวและให้ Claude สรุป…\nประมาณ 30–90 วินาที",
     follows: "เรื่องที่ติดตาม", addFollow: "+ ติดตามคำค้น", noFollow: "ยังไม่ได้ติดตามเรื่องไหน\nกด 📌 บนการ์ดข่าว หรือเพิ่มคำค้นเอง",
-    loadingStory: "Claude กำลังเรียบเรียงเรื่องนี้…", story: "เล่าเรื่อง", analogy: "เปรียบให้เห็นภาพ", timeline: "ไทม์ไลน์",
+    loadingStory: "กำลังค้นข่าวของเรื่องนี้และเรียบเรียง…", story: "เล่าเรื่อง", analogy: "เปรียบให้เห็นภาพ", timeline: "ไทม์ไลน์",
     sides: "แต่ละฝ่ายว่าอย่างไร", conflicts: "ข้อมูลที่ยังขัดกัน", watch: "ต้องจับตาต่อ", sources: "แหล่งข่าว",
     askAI: "ถาม AI เกี่ยวกับเรื่องนี้…", unfollow: "เลิกติดตาม", refresh: "อัปเดตใหม่",
     W: { who:"ใคร", what:"ทำอะไร", where:"ที่ไหน", when:"เมื่อไร", why:"ทำไม", how:"อย่างไร" },
@@ -189,10 +189,11 @@ const T = {
     presets: ["เป็นกลาง กระชับ","อธิบายแบบเด็ก ม.ปลาย","เน้นตัวเลขและข้อมูล","มุมมองผลกระทบต่อคนทั่วไป"],
     noSaved: "ยังไม่มีข่าวที่บันทึก", newTopic: "พิมพ์หัวข้อ เช่น ค่าแรง, ประกันสังคม", newFollow: "พิมพ์คำค้น เช่น ชุมนุม ทำเนียบ",
     ok: "ตกลง", cancel: "ยกเลิก", retry: "ลองใหม่", setUrl: "",
-    pasteNews: "วางข่าว ลิงก์ หรือบทความ", pasteNewsPh: "วางเนื้อข่าวหลายชิ้นได้ในครั้งเดียว เช่น คัดลอกจากเว็บข่าว แอปข่าว หรือโพสต์",
-    pasteHint: "Claude จะแยกเป็นข่าวทีละชิ้น จัดตามหัวข้อที่เลือก และสรุปจากข้อความที่วางเท่านั้น",
+    pasteNews: "คำค้น หรือวางเนื้อข่าว (ไม่บังคับ)", pasteNewsPh: "เช่น ประท้วง, ค่าแรง หรือวางเนื้อข่าวที่คัดลอกมา",
+    noSearch: "หน้านี้ค้นเว็บไม่ได้ในตอนนี้ ให้วางเนื้อข่าวแทน (ต้องเปิดใน claude.ai และเชื่อม Parallel Search)",
+    pasteHint: "เว้นว่าง = ค้นข่าวล่าสุดตามหัวข้อที่เลือก · พิมพ์คำค้น = ค้นเฉพาะเรื่องนั้น · วางเนื้อข่าว = สรุปจากข้อความที่วาง",
     lastFeed: "ข่าวชุดล่าสุด", addToStory: "เพิ่มข่าวในเรื่องนี้", addToStoryPh: "วางข่าวใหม่ของเรื่องนี้ แล้ว Claude จะรวมเข้าไทม์ไลน์",
-    storyEmpty: "ยังไม่มีข่าวในเรื่องนี้\nวางข่าวด้านล่างเพื่อเริ่มสรุป", rebuild: "อัปเดตสรุป",
+    storyEmpty: "ยังหาข่าวของเรื่องนี้ไม่เจอ\nกดอัปเดตอีกครั้งภายหลัง หรือวางข่าวด้านล่าง", rebuild: "อัปเดตสรุป",
     transcript: "วางคำบรรยาย / transcript ของคลิป", transcriptPh: "เช่น คัดลอกจาก YouTube › แสดงข้อความถอดเสียง",
     clipTitle: "ชื่อคลิปหรือลิงก์ (ไม่บังคับ)", noAI: "ต้องเปิดหน้านี้ใน claude.ai เพื่อใช้ Claude",
     aiBy: "สรุปโดย Claude",
@@ -228,8 +229,9 @@ const T = {
     presets: ["Neutral and concise","Explain like I'm 16","Focus on numbers","Impact on everyday people"],
     noSaved: "No saved news yet", newTopic: "Type a topic", newFollow: "Type a keyword",
     ok: "OK", cancel: "Cancel", retry: "Retry", setUrl: "",
-    pasteNews: "Paste news, links or articles", pasteNewsPh: "Paste several articles at once, copied from news sites, apps or posts",
-    pasteHint: "Claude splits them into stories, sorts them by your topics and summarizes only what you pasted",
+    pasteNews: "Keyword or pasted news (optional)", pasteNewsPh: "e.g. protest, minimum wage, or paste article text",
+    noSearch: "Web search isn't available here right now. Paste the article text instead (open in claude.ai with Parallel Search connected)",
+    pasteHint: "Empty = latest news for your topics · keyword = search that story · pasted text = summarize what you pasted",
     lastFeed: "Last batch", addToStory: "Add news to this story", addToStoryPh: "Paste new coverage and Claude will merge it into the timeline",
     storyEmpty: "No coverage in this story yet\nPaste news below to start", rebuild: "Rebuild summary",
     transcript: "Paste the video's captions / transcript", transcriptPh: "e.g. copy from YouTube › Show transcript",
@@ -324,6 +326,55 @@ async function ai(prompt, tier){
     throw new Error((e && e.message) || "เรียก Claude ไม่สำเร็จ");
   }
 }
+let MCP = null;
+const mcpP = (async () => { try { MCP = await window.claude?.use?.("mcp"); } catch(e){ MCP = null; } })();
+const SEARCH_SERVER = "Parallel Search";
+const SID = "gay-news-artifact-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 12);
+const TH_MONTHS = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+function todayTh(){ const d = new Date(); return `${d.getDate()} ${TH_MONTHS[d.getMonth()]} ${d.getFullYear() + 543}`; }
+function monthTh(){ const d = new Date(); return `${TH_MONTHS[d.getMonth()]} ${d.getFullYear() + 543}`; }
+const PERIOD_TH = { "1d": "24 ชั่วโมงที่ผ่านมา", "3d": "3 วันที่ผ่านมา", "7d": "7 วันที่ผ่านมา" };
+function hostOf(u){ try { return new URL(u).hostname.replace(/^www\./, ""); } catch(e){ return ""; } }
+async function webSearch(objective, queries){
+  await mcpP;
+  if (!MCP) throw new Error(L().noSearch);
+  try {
+    const r = await MCP.callTool(SEARCH_SERVER, "web_search", { objective, search_queries: queries.slice(0, 3), session_id: SID, model_name: "claude-artifact-gay-news" }, { cache: { staleTime: 300000 } });
+    const pl = r && r.payload;
+    const res = (pl && Array.isArray(pl.results)) ? pl.results : [];
+    return res.map(x => ({ title: clip(x.title, 200), url: String(x.url || ""), date: clip(x.publish_date || "", 30), text: clip((x.excerpts || []).join(" "), 1500) }))
+      .filter(x => /^https?:\/\//.test(x.url));
+  } catch(e){
+    const c = e && e.code;
+    if (c === "server_not_connected" || c === "server_not_found") throw new Error("ยังไม่ได้เชื่อม Parallel Search: ไปที่ claude.ai › Settings › Connectors แล้วเพิ่ม Parallel Search");
+    if (c === "not_in_manifest") throw new Error("ยังไม่ได้อนุญาตให้หน้านี้ใช้ Parallel Search เปิดหน้านี้ใหม่แล้วกดอนุญาต");
+    if (c === "needs_reauth") throw new Error("Parallel Search ต้องเชื่อมใหม่: claude.ai › Settings › Connectors");
+    if (c === "selection_required") throw new Error("มี Parallel Search มากกว่า 1 ตัว ให้เลือกตัวที่จะใช้ในหน้าต่างที่ขึ้นมา");
+    if (c === "not_granted" || c === "capability_disabled" || c === "capability_removed") throw new Error(L().noSearch);
+    if (c === "tool_error") throw new Error("Parallel Search ตอบกลับผิดพลาด: " + (e.message || ""));
+    throw new Error("ค้นข่าวไม่สำเร็จชั่วคราว ลองใหม่อีกครั้ง");
+  }
+}
+function freshEnough(x, period){
+  const t = Date.parse(x.date); if (!x.date || !t) return true;
+  const days = { "1d": 2, "3d": 4, "7d": 8 }[period] || 8;
+  return Date.now() - t <= days * 86400e3;
+}
+async function searchNews(terms, period){
+  let firstErr = null;
+  const lists = await Promise.all(terms.slice(0, 6).map(t =>
+    webSearch(`ข่าวล่าสุดเกี่ยวกับ "${t}" ใน${PERIOD_TH[period] || "สัปดาห์นี้"} (วันนี้คือ ${todayTh()}) จากสำนักข่าวที่น่าเชื่อถือ เน้นข่าวใหม่ ไม่เอาข่าวเก่า`,
+      [`ข่าว ${t} ล่าสุด`, `${t} ${monthTh()}`, `${t} news ${new Date().getFullYear()}`])
+      .then(r => r.map(x => ({ ...x, topic: t })))
+      .catch(e => { firstErr = firstErr || e; return []; })));
+  const seen = new Set(), out = [];
+  for (const list of lists) for (const x of list){ if (seen.has(x.url) || !freshEnough(x, period)) continue; seen.add(x.url); out.push(x); }
+  if (!out.length && firstErr) throw firstErr;
+  return out;
+}
+function resultsToText(list){
+  return list.map((x, i) => `[${i + 1}] ${x.title}\nหัวข้อที่ค้น: ${x.topic || "-"}\nURL: ${x.url}\nวันที่เผยแพร่: ${x.date || "ไม่ระบุ"}\nเว็บ: ${hostOf(x.url)}\n${x.text}`).join("\n\n");
+}
 const LENGTH_RULE = { short:"points มี 1 ข้อ สั้นมาก", mid:"points มี 2-3 ข้อ", long:"points มี 4-5 ข้อ แต่ละข้ออธิบายให้เข้าใจ" };
 
 async function api(path, data = {}){
@@ -335,14 +386,25 @@ async function api(path, data = {}){
     }
     case "/prefs/save": await dset(P("prefs"), data.prefs); return { prefs: data.prefs };
     case "/news": {
-      const text = String(data.text || "").trim();
-      if (!text) throw new Error(L().pasteNewsPh);
-      if (text.length < 60 && !/https?:\/\//.test(text) && !text.includes("\n")) throw new Error(L().needText);
-      const topics = (data.topics || []).slice(0, 12);
+      let text = String(data.text || "").trim();
+      let topics = (data.topics || []).slice(0, 12);
+      const period = ["1d","3d","7d"].includes(data.period) ? data.period : "1d";
+      let fromSearch = false;
+      if (!text || (text.length < 60 && !/https?:\/\//.test(text) && !text.includes("\n"))){
+        const terms = text ? [text] : topics;
+        if (!terms.length) throw new Error("เลือกหัวข้อ หรือพิมพ์คำค้นก่อน");
+        if (text) topics = [text, ...topics];
+        const found = await searchNews(terms, period);
+        if (!found.length) throw new Error("ไม่พบข่าวใหม่ในช่วงเวลานี้ ลองเลือกช่วงเวลาให้ยาวขึ้น หรือเปลี่ยนคำค้น");
+        text = resultsToText(found.slice(0, 40));
+        fromSearch = true;
+      }
       const total = [10,20,30].includes(Number(p.newsCount)) ? Number(p.newsCount) : 20;
       const prompt = `คุณคือบรรณาธิการข่าวที่เป็นกลาง ผู้ใช้วางข้อความด้านล่าง ซึ่งอาจมีข่าวหลายชิ้น หัวข่าว ลิงก์ หรือโพสต์ปนกัน
 งานของคุณ: แยกเป็นข่าวทีละเรื่อง (สูงสุด ${total} เรื่อง) รวมข่าวซ้ำเรื่องเดียวกันเป็นเรื่องเดียว แล้วสรุปแต่ละเรื่อง
-ใช้เฉพาะข้อมูลในข้อความที่วาง ห้ามแต่งข้อเท็จจริง ตัวเลข ชื่อ หรือวันที่ที่ไม่มีในข้อความ
+ใช้เฉพาะข้อมูลในข้อความที่วาง ห้ามแต่งข้อเท็จจริง ตัวเลข ชื่อ หรือวันที่ที่ไม่มีในข้อความ${fromSearch ? `
+ข้อความนี้เป็นผลค้นหาเว็บ วันนี้คือ ${todayTh()} — ตัดผลที่เป็นข่าวเก่ากว่า${PERIOD_TH[period]}ทิ้ง (ดูวันที่เผยแพร่และเนื้อหา) ตัดหน้าที่ไม่ใช่ข่าว (เช่น วิกิพีเดีย หน้ารวมแท็ก) ทิ้ง
+link ให้ใช้ URL ของผลนั้น source ให้ใช้ชื่อสำนักข่าว (ดูจากชื่อเว็บ) date ให้ใช้วันที่เผยแพร่` : ""}
 หัวข้อที่ผู้ใช้สนใจ: ${topics.join(", ") || "-"} — ใส่ topic เป็นหนึ่งในหัวข้อนี้ ถ้าไม่เข้ากับหัวข้อไหนให้ใส่ "อื่นๆ"
 ${langLine(p)}
 ตอบเป็น JSON เท่านั้น:
@@ -359,9 +421,9 @@ ${fitBytes(text, 48000)}
         id: i, topic: clip(x.topic || "อื่นๆ", 40), headline: clip(x.headline, 220),
         points: (Array.isArray(x.points) ? x.points : []).map(s => clip(s, 400)).slice(0, 6),
         category: clip(x.category || x.topic, 30), tone: ["บวก","กลาง","ลบ"].includes(x.tone) ? x.tone : "กลาง",
-        source: clip(x.source, 60), link: /^https?:\/\//.test(x.link || "") ? x.link : "", date: clip(x.date, 60), sources: 1,
+        source: clip(x.source || hostOf(x.link), 60), link: /^https?:\/\//.test(x.link || "") ? x.link : "", date: clip(x.date, 60), sources: 1,
       })).filter(x => x.headline);
-      if (!items.length) throw new Error("ไม่พบข่าวในข้อความที่วาง");
+      if (!items.length) throw new Error(fromSearch ? "ไม่พบข่าวใหม่ที่ตรงกับช่วงเวลานี้ ลองเลือกช่วงเวลาให้ยาวขึ้น" : "ไม่พบข่าวในข้อความที่วาง");
       const out = { overview: clip(r.overview, 800), items, created: new Date().toISOString() };
       await dset(P("feed"), out);
       return out;
@@ -385,9 +447,23 @@ ${fitBytes(text, 48000)}
       const key = P("story_" + h32(data.q));
       const st = await dget(key, { q: data.q, texts: [], result: null });
       if (data.add){ st.texts.push({ text: clip(data.add, 8000), added: new Date().toISOString() }); st.texts = st.texts.slice(-15); }
+      if (!data.add && (data.refresh || !st.texts.length)){
+        try {
+          const found = await searchNews([data.q], "7d");
+          const seen = new Set(st.urls || []);
+          const fresh = found.filter(x => !seen.has(x.url)).slice(0, 12);
+          if (fresh.length){
+            st.texts.push({ text: resultsToText(fresh), added: new Date().toISOString() });
+            st.urls = [...seen, ...fresh.map(x => x.url)].slice(-300);
+            st.texts = st.texts.slice(-15);
+            st.result = null;
+          }
+        } catch(e){ if (!st.texts.length) throw e; }
+      }
       if (!st.texts.length) return { empty: true };
       if (st.result && !data.add && !data.refresh) return st.result;
       const prompt = `คุณคือนักข่าวที่เป็นกลาง ด้านล่างคือข่าวทั้งหมดที่ผู้ใช้รวบรวมไว้ของเรื่อง "${data.q}" (เรียงตามลำดับที่เพิ่ม)
+วันนี้คือ ${todayTh()} บางชิ้นเป็นผลค้นหาเว็บ ให้ข้ามหน้าที่ไม่ใช่ข่าวและข่าวที่ไม่เกี่ยวกับเรื่องนี้
 รวมเป็นเรื่องเดียว ใช้เฉพาะข้อมูลที่ให้มา ถ้าไม่มีข้อมูลส่วนใดให้ใส่ "ยังไม่มีข้อมูล" ห้ามเดา
 ถ้าแต่ละแหล่งรายงานตัวเลขหรือข้อเท็จจริงไม่ตรงกัน ให้ใส่ใน conflicts ${langLine(p)}
 ตอบเป็น JSON เท่านั้น:
@@ -541,6 +617,7 @@ function homeView(){
     <div class="chips">${chips}<button class="chip dash" id="addTopic">${esc(t.add)}</button></div>
   </div>
   <div style="display:flex;flex-direction:column;gap:8px"><span class="label">${esc(t.len)}</span>${seg("length",[["short","short"],["mid","mid"],["long","long"]])}</div>
+  <div style="display:flex;flex-direction:column;gap:8px"><span class="label">${esc(t.period)}</span>${seg("period",[["1d","d1"],["3d","d3"],["7d","d7"]])}</div>
   <div style="display:flex;flex-direction:column;gap:6px"><label class="label" for="newsText">${esc(t.pasteNews)}</label>
     <textarea id="newsText" class="field paste" placeholder="${esc(t.pasteNewsPh)}">${esc(S.newsText||"")}</textarea>
     <span class="hint">${esc(t.pasteHint)}</span></div>
@@ -605,7 +682,7 @@ function storyView(){
   const head = `<div class="row" style="margin:-6px 0 -4px -8px">
     <button class="icon-btn" id="backFollow" aria-label="back">${svg("back",22)}</button>
     <b style="flex:1;font-size:17px">${esc(S.storyQ)}</b>
-    ${s&&!s.error&&!s.empty?`<button class="icon-btn" id="storyRefresh" aria-label="${esc(t.rebuild)}">${svg("refresh",20)}</button>`:""}</div>`;
+    ${s&&!s.error?`<button class="icon-btn" id="storyRefresh" aria-label="${esc(t.rebuild)}">${svg("refresh",20)}</button>`:""}</div>`;
   if (!s) return head + loading(t.loadingStory);
   const addBox = `<section style="display:flex;flex-direction:column;gap:8px"><label class="label" for="storyText">${esc(t.addToStory)}</label>
     <textarea id="storyText" class="field paste" placeholder="${esc(t.addToStoryPh)}"></textarea>
@@ -675,7 +752,7 @@ function videoView(){
 async function loadFeed(refresh){
   const p = S.prefs;
   S.screen = "feed"; S.feed = null; S.filter = "all"; S.busy = true; render();
-  try { S.feed = await api("/news", { topics: p.topics, length: p.length, text: S.newsText }); S.lastFeed = S.feed; }
+  try { S.feed = await api("/news", { topics: p.topics, length: p.length, period: p.period, text: S.newsText }); S.lastFeed = S.feed; }
   catch(e){ S.feed = { error: e.message }; }
   S.busy = false; render(); $("view").scrollTop = 0;
 }
@@ -719,7 +796,7 @@ document.addEventListener("click", async e => {
   switch (el.id){
     case "brand": S.tab = "news"; S.screen = "home"; render(); break;
     case "menuBtn": openDrawer(); break;
-    case "goBtn": case "feedRetry": { const ta = $("newsText"); if (ta) S.newsText = ta.value; if (!String(S.newsText||"").trim()){ toast(L().pasteNewsPh); break; } loadFeed(false); break; }
+    case "goBtn": case "feedRetry": { const ta = $("newsText"); if (ta) S.newsText = ta.value; loadFeed(false); break; }
     case "sameBtn": S.feed = S.lastFeed; S.filter = "all"; S.screen = "feed"; render(); break;
     case "backHome": S.screen = "home"; render(); break;
     case "recBtn": S.recOpen = true; render();
