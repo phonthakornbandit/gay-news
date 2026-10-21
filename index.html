@@ -179,7 +179,7 @@ const T = {
     logout: "ออกจากระบบ", quota: "ใช้ AI วันนี้", light: "สว่าง", dark: "มืด", auto: "ตามเครื่อง",
     uiLang: "ภาษาหน้าเว็บ", sumLang: "ภาษาของสรุป", save: "บันทึก", reset: "คืนค่าเริ่มต้น",
     name: "ชื่อที่ใช้ทักทาย", font: "ขนาดตัวอักษร", count: "จำนวนข่าวต่อครั้ง",
-    pwd: "รหัสผ่าน", login: "เข้าสู่ระบบ", loginSub: "ใส่รหัสผ่านของคุณ (แต่ละคนมีรหัสของตัวเอง)",
+    p1: "โปรไฟล์ 1", p2: "โปรไฟล์ 2", switchTo: "สลับเป็นโปรไฟล์", pwd: "รหัสผ่าน", login: "เข้าสู่ระบบ", loginSub: "ใส่รหัสผ่านของคุณ (แต่ละคนมีรหัสของตัวเอง)",
     saved1: "บันทึกแล้ว", copied: "คัดลอกแล้ว", followed: "ติดตามแล้ว",
     promptHelp: "เขียนสไตล์ที่ต้องการ เช่น \"อธิบายแบบเด็ก ม.ปลาย\" หรือ \"เน้นตัวเลขและผลกระทบต่อเงินในกระเป๋า\" ระบบจะใช้รูปแบบผลลัพธ์เดิมเสมอ",
     pNews: "สรุปข่าววันนี้", pRec: "ข่าวแนะนำ", pStory: "สรุปเรื่องที่ติดตาม", pVideo: "สรุปวิดีโอ",
@@ -210,7 +210,7 @@ const T = {
     logout: "Sign out", quota: "AI calls today", light: "Light", dark: "Dark", auto: "System",
     uiLang: "Interface language", sumLang: "Summary language", save: "Save", reset: "Reset to default",
     name: "Display name", font: "Font size", count: "News per batch",
-    pwd: "Password", login: "Sign in", loginSub: "Enter your password (each person has their own)",
+    p1: "Profile 1", p2: "Profile 2", switchTo: "Switch to profile", pwd: "Password", login: "Sign in", loginSub: "Enter your password (each person has their own)",
     saved1: "Saved", copied: "Copied", followed: "Following",
     promptHelp: "Describe the style you want, e.g. \"explain like I'm 16\". The output format always stays the same.",
     pNews: "Daily news", pRec: "Recommendations", pStory: "Followed stories", pVideo: "Video summary",
@@ -223,7 +223,7 @@ const BASE_TOPICS = ["เศรษฐกิจ","การเมือง","ไ�
 
 /* =================== สถานะ =================== */
 const S = {
-  pass: lsGet("gn_pass") || "", user: null, prefs: null,
+  user: lsGet("gn_user") === "u2" ? "u2" : "jo", ready: false, prefs: null,
   tab: "news", screen: "home", feed: null, filter: "all", rec: null, recOpen: false,
   follows: [], storyQ: null, story: null, saved: [],
   vMode: "sum", vResult: null, vHistory: [], busy: false, err: null,
@@ -267,10 +267,9 @@ async function api(path, data = {}){
   if (WORKER_URL.includes("YOUR-" + "SUBDOMAIN")) throw new Error(L().setUrl);
   const r = await fetch(WORKER_URL.replace(/\/+$/,"") + path, {
     method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...data, password: S.pass }),
+    body: JSON.stringify({ ...data, user: S.user }),
   });
   const d = await r.json().catch(() => ({ error: "เซิร์ฟเวอร์ตอบกลับผิดรูปแบบ" }));
-  if (r.status === 401) { S.user = null; lsSet("gn_pass", null); render(); }
   if (!r.ok) throw new Error(d.error || `ผิดพลาด (${r.status})`);
   return d;
 }
@@ -291,7 +290,7 @@ function applyPrefs(){
 function render(){
   const top = $("topbar"), tabs = $("tabs"), view = $("view");
   $("askBar").innerHTML = "";
-  if (!S.user){ top.hidden = true; tabs.hidden = true; view.innerHTML = loginView(); bindLogin(); return; }
+  if (!S.ready){ top.hidden = false; tabs.hidden = true; view.innerHTML = S.err ? errBox() + `<button class="btn ghost" id="bootRetry">${esc(L().retry)}</button>` : loading(""); return; }
   top.hidden = false; tabs.hidden = false;
   tabs.innerHTML = [["news","tabNews"],["follow","tabFollow"],["video","tabVideo"]].map(([k,l]) =>
     `<button class="${S.tab===k?"on":""}" data-tab="${k}" aria-current="${S.tab===k}">${svg(k==="news"?"news":k,22)}${L()[l]}</button>`).join("");
@@ -306,30 +305,9 @@ function render(){
 function loading(text){ return `<div class="loading"><div class="spin"></div><div style="white-space:pre-line">${esc(text)}</div></div>`; }
 function errBox(){ return S.err ? `<div class="err">${esc(S.err)}</div>` : ""; }
 
-function loginView(){
-  const t = L();
-  return `<div class="login">
-    <div class="row"><span class="logo" style="width:44px;height:44px;font-size:20px;border-radius:12px">G</span><b style="font-size:26px">GAY News</b></div>
-    <div class="muted">${esc(t.loginSub)}</div>
-    <label class="sr" for="pw">${esc(t.pwd)}</label>
-    <input id="pw" class="field" type="password" placeholder="${esc(t.pwd)}" autocomplete="current-password">
-    ${errBox()}
-    <button class="btn" id="loginBtn" ${S.busy?"disabled":""}>${S.busy?'<span class="spin" style="border-top-color:#fff"></span>':esc(t.login)}</button>
-  </div>`;
-}
-function bindLogin(){
-  const go = async () => {
-    const v = $("pw").value.trim(); if (!v) return;
-    S.pass = v; S.busy = true; S.err = null; render();
-    try { await doLogin(); } catch(e){ S.err = e.message; S.pass = ""; }
-    S.busy = false; render();
-  };
-  $("loginBtn").onclick = go;
-  $("pw").onkeydown = e => { if (e.key === "Enter") go(); };
-}
 async function doLogin(){
   const d = await api("/login");
-  S.user = d.user; S.prefs = d.prefs; lsSet("gn_pass", S.pass); applyPrefs();
+  S.prefs = d.prefs; S.ready = true; applyPrefs();
   api("/follow/list").then(x => { S.follows = x.follows; }).catch(()=>{});
   api("/saved/list").then(x => { S.saved = x.saved; }).catch(()=>{});
 }
@@ -542,7 +520,10 @@ document.addEventListener("click", async e => {
         ? v.sections.map(s => `[${s.start}] ${s.title}\n` + s.lines.map(l => `${l.speaker}: ${l.text}`).join("\n")).join("\n\n")
         : `${v.headline}\n\n` + (v.summary||[]).map(s=>"• "+s).join("\n") + "\n\n" + (v.key_moments||[]).map(k=>`${k.time} ${k.point}`).join("\n");
       try { await navigator.clipboard.writeText(txt); toast(L().copied); } catch(err){ toast("copy failed"); } break; }
-    case "logout": lsSet("gn_pass", null); S.user = null; S.pass = ""; closeDrawer(); S.feed = null; S.rec = null; S.vResult = null; render(); break;
+    case "switchUser": S.user = S.user === "jo" ? "u2" : "jo"; lsSet("gn_user", S.user); closeDrawer();
+      Object.assign(S, { ready: false, feed: null, rec: null, recOpen: false, vResult: null, vHistory: [], follows: [], saved: [], storyQ: null, story: null, screen: "home", tab: "news", err: null });
+      boot(); break;
+    case "bootRetry": boot(); break;
   }
 });
 document.addEventListener("submit", async e => {
@@ -572,7 +553,8 @@ function openDrawer(){
     <div class="hd"><b style="font-size:17px">${esc(t.menu)}</b><button class="icon-btn" id="drawerClose" aria-label="close">${svg("close",22)}</button></div>
     <div class="row" style="padding:18px 20px;border-bottom:1px solid var(--line2);gap:12px">
       <span class="avatar">${esc((p.name||"?").slice(0,1).toUpperCase())}</span>
-      <div style="display:flex;flex-direction:column"><b>${esc(p.name||"—")}</b><span class="muted" style="font-size:12px">${S.user==="jo"?"Profile 1":"Profile 2"}</span></div></div>
+      <div style="display:flex;flex-direction:column;flex:1"><b>${esc(p.name||"—")}</b><span class="muted" style="font-size:12px">${S.user==="jo"?t.p1:t.p2}</span></div>
+      <button class="chip" id="switchUser" style="height:34px">${esc(t.switchTo)} ${S.user==="jo"?"2":"1"}</button></div>
     <nav style="display:flex;flex-direction:column;padding:8px">
       ${item("profile","user",t.profile,t.profileS)}
       ${item("prompt","prompt",t.prompt,t.promptS)}
@@ -580,12 +562,11 @@ function openDrawer(){
       ${item("lang","globe",t.lang,`${p.uiLang==="en"?"English":"ไทย"} · ${p.sumLang==="en"?"English":"ไทย"}`)}
       ${item("saved","bookmark",t.saved,String(S.saved.length))}
       ${item("settings","gear",t.settings,t.settingsS)}
-      <button class="mi" id="logout"><span class="ic">${svg("logout",18)}</span><span class="t"><span>${esc(t.logout)}</span><span></span></span></button>
     </nav>
     <div style="margin:8px 20px;padding:14px;border-radius:14px;background:var(--soft)" id="quotaBox"><span class="muted">${esc(t.quota)}: …</span></div>`;
   $("drawerWrap").classList.add("open");
   $("drawerClose").onclick = closeDrawer;
-  api("/quota").then(q => { const b = $("quotaBox"); if (b) b.innerHTML = `<div class="between" style="font-size:13px"><span class="muted">${esc(t.quota)}</span><b>${q.aiCalls}</b></div>`; }).catch(()=>{});
+  api("/quota").then(q => { const b = $("quotaBox"); if (b) b.innerHTML = `<div class="between" style="font-size:13px"><span class="muted">${esc(t.quota)}</span><b>${q.aiCalls} / ${q.limit}</b></div>`; }).catch(()=>{});
 }
 function closeDrawer(){ $("drawerWrap").classList.remove("open"); }
 $("drawerWrap").addEventListener("click", e => { if (e.target.id === "drawerWrap") closeDrawer(); });
@@ -649,12 +630,12 @@ function askText(label, cb, def){
 
 /* =================== เริ่มต้น =================== */
 matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", applyPrefs);
-(async () => {
+async function boot(){
+  S.ready = false; S.err = null; render();
+  try { await doLogin(); } catch(e){ S.err = e.message; }
   render();
-  if (S.pass){ S.busy = true; render();
-    try { await doLogin(); } catch(e){ S.err = e.message; S.pass = ""; lsSet("gn_pass", null); }
-    S.busy = false; render(); }
-})();
+}
+boot();
 </script>
 </body>
 </html>

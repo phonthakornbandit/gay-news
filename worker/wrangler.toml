@@ -8,4 +8,4 @@ binding = "NEWS"
 id = "ac983757884a4bf5b518cce174ad22b1"
 
 # Secrets (ตั้งใน Cloudflare เท่านั้น ห้ามใส่ในไฟล์นี้):
-#   GEMINI_API_KEY, PASS_JO, PASS_2
+#   GEMINI_API_KEY  (ไม่บังคับ: DAILY_LIMIT)

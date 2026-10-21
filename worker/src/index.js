@@ -1,11 +1,14 @@
 // GAY News — Cloudflare Worker (backend)
-// Secrets ที่ต้องตั้งใน Cloudflare: GEMINI_API_KEY, PASS_JO, PASS_2
-// ตัวแปรเสริม (ไม่บังคับ): MODEL  — ชื่อรุ่น Gemini ถ้าอยากเปลี่ยน
+// Secret ที่ต้องตั้งใน Cloudflare: GEMINI_API_KEY
+// ตัวแปรเสริม (ไม่บังคับ): MODEL — ชื่อรุ่น Gemini, DAILY_LIMIT — จำกัดจำนวนครั้งเรียก AI ต่อวัน (ค่าเริ่มต้น 300)
+// ไม่มีระบบรหัสผ่าน: รับเฉพาะคำขอจากหน้าเว็บ GitHub Pages ของเจ้าของ และมีเพดานการใช้ AI ต่อวัน
 
 const DEFAULT_MODEL = "gemini-2.5-flash";
 
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
+const ALLOWED_ORIGINS = ["https://phonthakornbandit.github.io"];
+let CORS = {
+  "Access-Control-Allow-Origin": ALLOWED_ORIGINS[0],
+  "Vary": "Origin",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
 };
@@ -26,6 +29,10 @@ const DEFAULT_PREFS = {
 
 export default {
   async fetch(request, env) {
+    const origin = request.headers.get("Origin") || "";
+    const okOrigin = ALLOWED_ORIGINS.includes(origin) || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+    CORS = { ...CORS, "Access-Control-Allow-Origin": okOrigin ? origin : ALLOWED_ORIGINS[0] };
+    if (origin && !okOrigin) return json({ error: "ไม่อนุญาต" }, 403);
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
     if (request.method !== "POST") return json({ error: "ใช้ได้เฉพาะ POST" }, 405);
 
@@ -33,8 +40,7 @@ export default {
     let body = {};
     try { body = await request.json(); } catch { return json({ error: "ข้อมูลที่ส่งมาไม่ถูกต้อง" }, 400); }
 
-    const user = whoIs(env, body.password);
-    if (!user) return json({ error: "รหัสผ่านไม่ถูกต้อง" }, 401);
+    const user = body.user === "u2" ? "u2" : "jo";
 
     try {
       switch (path) {
@@ -69,13 +75,6 @@ function json(data, status = 200) {
     status,
     headers: { ...CORS, "Content-Type": "application/json; charset=utf-8" },
   });
-}
-
-function whoIs(env, pw) {
-  if (!pw || typeof pw !== "string") return null;
-  if (env.PASS_JO && pw === env.PASS_JO) return "jo";
-  if (env.PASS_2 && pw === env.PASS_2) return "u2";
-  return null;
 }
 
 async function getJSON(env, key, fallback) {
@@ -147,6 +146,8 @@ async function savePrefs(env, user, incoming) {
 
 async function gemini(env, parts, maxTokens = 8192) {
   if (!env.GEMINI_API_KEY) throw new Error("ยังไม่ได้ตั้ง GEMINI_API_KEY ใน Cloudflare");
+  const limit = Number(env.DAILY_LIMIT) || 300;
+  if ((Number(await env.NEWS.get(`usage:${today()}`)) || 0) >= limit) throw new Error(`ใช้ AI ครบ ${limit} ครั้งของวันนี้แล้ว (เพดานกันใช้เกิน) ลองใหม่พรุ่งนี้`);
   const model = env.MODEL || DEFAULT_MODEL;
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
@@ -178,7 +179,7 @@ async function bumpUsage(env) {
 }
 
 async function quota(env) {
-  return { date: today(), aiCalls: Number(await env.NEWS.get(`usage:${today()}`)) || 0 };
+  return { date: today(), aiCalls: Number(await env.NEWS.get(`usage:${today()}`)) || 0, limit: Number(env.DAILY_LIMIT) || 300 };
 }
 
 /* ---------------- Google News RSS ---------------- */
