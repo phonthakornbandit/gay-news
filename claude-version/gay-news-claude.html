@@ -68,6 +68,10 @@ h2{margin:0;font-size:16px}
 .tag.a{background:var(--accent-soft);color:var(--accent);font-weight:600}
 .tag.hot{background:var(--hot-bg);color:var(--hot-ink);font-weight:600}
 .card h3{margin:0;font-size:16px;line-height:1.45}
+.thumb{display:block;margin:-14px -14px 4px;aspect-ratio:16/9;max-width:calc(100% + 28px);overflow:hidden;border-radius:16px 16px 0 0;background:var(--soft2)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.srow{display:flex;gap:12px;align-items:flex-start}
+.srow img{width:72px;height:54px;object-fit:cover;border-radius:8px;flex-shrink:0;background:var(--soft2)}
 .card ul{margin:0;padding-left:18px;font-size:14px;line-height:1.6;color:var(--ink2)}
 .card .foot{display:flex;align-items:center;justify-content:space-between;padding-top:4px;border-top:1px solid var(--line2)}
 .card .acts{display:flex}
@@ -192,6 +196,7 @@ const T = {
     transcript: "วางคำบรรยาย / transcript ของคลิป", transcriptPh: "เช่น คัดลอกจาก YouTube › แสดงข้อความถอดเสียง",
     clipTitle: "ชื่อคลิปหรือลิงก์ (ไม่บังคับ)", noAI: "ต้องเปิดหน้านี้ใน claude.ai เพื่อใช้ Claude",
     aiBy: "สรุปโดย Claude",
+    needText: "เวอร์ชันนี้ค้นข่าวจากอินเทอร์เน็ตเองไม่ได้ ให้วางเนื้อข่าวหรือบทความ (หรือใช้เว็บหลัก phonthakornbandit.github.io/gay-news ที่ค้นข่าวจากคำค้นและมีรูปข่าว)",
   },
   en: {
     hello: ["Good morning","Good afternoon","Good evening","Good night"],
@@ -230,6 +235,7 @@ const T = {
     transcript: "Paste the video's captions / transcript", transcriptPh: "e.g. copy from YouTube › Show transcript",
     clipTitle: "Video title or link (optional)", noAI: "Open this page in claude.ai to use Claude",
     aiBy: "Summarized by Claude",
+    needText: "This version can't search the web. Paste the article text (or use the main site, which searches by keyword and shows photos)",
   }
 };
 const BASE_TOPICS = ["เศรษฐกิจ","การเมือง","ไอที","สุขภาพ","ต่างประเทศ","สังคม","กีฬา","บันเทิง","LGBTQ+"];
@@ -331,6 +337,7 @@ async function api(path, data = {}){
     case "/news": {
       const text = String(data.text || "").trim();
       if (!text) throw new Error(L().pasteNewsPh);
+      if (text.length < 60 && !/https?:\/\//.test(text) && !text.includes("\n")) throw new Error(L().needText);
       const topics = (data.topics || []).slice(0, 12);
       const total = [10,20,30].includes(Number(p.newsCount)) ? Number(p.newsCount) : 20;
       const prompt = `คุณคือบรรณาธิการข่าวที่เป็นกลาง ผู้ใช้วางข้อความด้านล่าง ซึ่งอาจมีข่าวหลายชิ้น หัวข่าว ลิงก์ หรือโพสต์ปนกัน
@@ -544,9 +551,9 @@ function recBox(){
   let inner;
   if (!S.rec) inner = loading("");
   else if (S.rec.error) inner = `<div class="err">${esc(S.rec.error)}</div>`;
-  else inner = S.rec.picks.map(p => `<a href="${safeUrl(p.link)}" target="_blank" rel="noopener" style="display:flex;flex-direction:column;gap:2px;color:var(--ink)">
+  else inner = S.rec.picks.map(p => `<a href="${safeUrl(p.link)}" target="_blank" rel="noopener" class="srow" style="color:var(--ink)">${p.image?`<img src="${safeUrl(p.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:""}<span style="display:flex;flex-direction:column;gap:2px">
       <span style="font-size:14px;font-weight:600;line-height:1.45">${esc(p.headline)}</span>
-      <span style="font-size:12px;color:var(--muted)">${p.outside?`<span class="tag hot" style="font-size:11px">${esc(t.outside)}</span> `:""}${esc(t.why)}: ${esc(p.why)} · ${esc(p.source)}</span></a>`).join("");
+      <span style="font-size:12px;color:var(--muted)">${p.outside?`<span class="tag hot" style="font-size:11px">${esc(t.outside)}</span> `:""}${esc(t.why)}: ${esc(p.why)} · ${esc(p.source)}</span></span></a>`).join("");
   return `<div class="card" style="background:var(--soft);max-height:46vh;overflow-y:auto">
     <div class="between"><b style="font-size:14px">${esc(t.recT)}</b><button class="icon-btn" style="width:32px;height:32px" id="recClose" aria-label="close">${svg("close",16)}</button></div>
     ${inner}</div>`;
@@ -571,6 +578,7 @@ function feedView(){
   </div>
   ${f.overview?`<section class="hero"><small>${esc(t.overview)}</small><p>${esc(f.overview)}</p></section>`:""}
   ${shown.map(n => `<article class="card">
+    ${n.image?`<a class="thumb" href="${safeUrl(n.link)}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><img src="${safeUrl(n.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></a>`:""}
     <div class="row" style="font-size:12px;gap:6px;flex-wrap:wrap"><span class="tag a">${esc(n.category)}</span><span class="tag">${esc(n.tone)}</span>${n.source||n.date?`<span style="color:var(--faint)">· ${esc(n.source)}${n.date?" · "+esc(n.date):""}</span>`:""}</div>
     <h3>${esc(n.headline)}</h3>
     ${n.points.length?`<ul>${n.points.map(p=>`<li>${esc(p)}</li>`).join("")}</ul>`:""}

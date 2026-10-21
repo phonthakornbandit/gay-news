@@ -210,6 +210,51 @@ function tag(xml, name) {
   return m ? decodeEntities(m[1]).trim() : "";
 }
 
+function imgFrom(xmlItem, desc) {
+  const cands = [
+    (xmlItem.match(/<media:content[^>]*url="([^"]+)"/) || [])[1],
+    (xmlItem.match(/<media:thumbnail[^>]*url="([^"]+)"/) || [])[1],
+    (xmlItem.match(/<enclosure[^>]*url="([^"]+)"[^>]*type="image/) || [])[1],
+    tag(xmlItem, "News:Image"),
+    ((desc || "").match(/<img[^>]*src="([^"]+)"/) || [])[1],
+  ].filter(Boolean).map(u => decodeEntities(u).trim());
+  const u = cands.find(x => /^https?:\/\//.test(x));
+  if (!u) return "";
+  // รูปย่อของ Bing ขอขนาดใหญ่ขึ้นได้
+  return /bing\.(com|net)\/th/.test(u) ? u.replace(/&(w|h|c|pid)=[^&]*/g, "") + "&w=640&h=360&c=7" : u;
+}
+
+// หา og:image จากหน้าข่าว (ใช้กับข่าวที่ RSS ไม่มีรูป) จำกัดเวลาและจำนวน
+async function ogImage(url) {
+  if (/news\.google\.com/.test(url)) return "";
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 3500);
+    const res = await fetch(url, { headers: { "User-Agent": UA, "Accept": "text/html" }, signal: ctrl.signal, redirect: "follow" });
+    if (!res.ok || !/html/.test(res.headers.get("content-type") || "")) { clearTimeout(t); return ""; }
+    const reader = res.body.getReader();
+    let html = "", n = 0;
+    while (n < 120000) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      n += value.length; html += new TextDecoder().decode(value);
+      if (/<\/head>/i.test(html)) break;
+    }
+    reader.cancel().catch(() => {});
+    clearTimeout(t);
+    const m = html.match(/<meta[^>]+(?:property|name)=["'](?:og:image|twitter:image)(?::src)?["'][^>]*content=["']([^"']+)["']/i)
+      || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]*(?:property|name)=["'](?:og:image|twitter:image)["']/i);
+    const u = m ? decodeEntities(m[1]).trim() : "";
+    return /^https?:\/\//.test(u) ? u : (u.startsWith("//") ? "https:" + u : "");
+  } catch { return ""; }
+}
+
+async function fillImages(items, max = 12) {
+  const need = items.filter(it => !it.image).slice(0, max);
+  await Promise.allSettled(need.map(async it => { it.image = await ogImage(it.link); }));
+  return items;
+}
+
 function parseRSS(xml) {
   const items = [];
   const re = /<item>([\s\S]*?)<\/item>/g;
@@ -230,6 +275,7 @@ function parseRSS(xml) {
       date: tag(it, "pubDate"),
       sources: Math.max(1, related),
       related: clean(desc.replace(/<[^>]+>/g, " · ").replace(/\s+/g, " "), 400),
+      image: imgFrom(it, desc),
     });
   }
   return items;
@@ -295,6 +341,7 @@ function parseBing(xml) {
       date: tag(it, "pubDate"),
       sources: 1,
       related: clean(tag(it, "description").replace(/<[^>]+>/g, " ").replace(/\s+/g, " "), 400),
+      image: imgFrom(it, tag(it, "description")),
     });
   }
   return items;
@@ -316,7 +363,7 @@ async function newsFeed(env, user, body) {
   const length = ["short", "mid", "long"].includes(body.length) ? body.length : prefs.length;
   const total = [10, 20, 30].includes(Number(prefs.newsCount)) ? Number(prefs.newsCount) : 20;
 
-  const key = `news:${user}:${await hash([today(), topics.join("|"), period, length, total, prefs.sumLang, prefs.styles.news].join("#"))}`;
+  const key = `news2:${user}:${await hash([today(), topics.join("|"), period, length, total, prefs.sumLang, prefs.styles.news].join("#"))}`;
   if (!body.refresh) {
     const cached = await getJSON(env, key, null);
     if (cached) return { ...cached, cached: true };
@@ -337,6 +384,7 @@ async function newsFeed(env, user, body) {
     }
   });
   const items = picked.slice(0, total);
+  const imgP = fillImages(items, 12);
   if (!items.length) throw new Error("ไม่พบข่าวในช่วงเวลานี้ ลองเลือกช่วงเวลาให้ยาวขึ้น");
 
   const listText = items.map((it, i) =>
@@ -355,6 +403,7 @@ ${langLine(prefs)}
 ${listText}`;
 
   const ai = await gemini(env, [{ text: prompt }], 8192);
+  await imgP;
   const byI = new Map((ai.items || []).map(x => [Number(x.i), x]));
   const out = {
     overview: clean(ai.overview, 800),
@@ -369,7 +418,7 @@ ${listText}`;
         points: (Array.isArray(a.points) ? a.points : []).map(p => clean(p, 400)).slice(0, 6),
         category: clean(a.category || it.topic, 30),
         tone: ["บวก", "กลาง", "ลบ"].includes(a.tone) ? a.tone : "กลาง",
-        title: it.title, source: it.source, link: it.link, date: it.date, sources: it.sources,
+        title: it.title, source: it.source, link: it.link, date: it.date, sources: it.sources, image: it.image || "",
       };
     }),
   };
@@ -404,7 +453,7 @@ ${items.map((it, i) => `[${i}] ${it.title} | ${it.source}`).join("\n")}`;
   const picks = (ai.picks || []).slice(0, 5).map(p => {
     const it = items[Number(p.i)];
     if (!it) return null;
-    return { headline: clean(p.headline || it.title, 220), why: clean(p.why, 200), outside: !!p.outside, link: it.link, source: it.source, date: it.date };
+    return { headline: clean(p.headline || it.title, 220), why: clean(p.why, 200), outside: !!p.outside, link: it.link, source: it.source, date: it.date, image: it.image || "" };
   }).filter(Boolean);
   const out = { picks, created: new Date().toISOString() };
   await putJSON(env, key, out, 86400);
@@ -442,6 +491,7 @@ async function story(env, user, q, refresh) {
   if (cached && !refresh && Date.now() - Date.parse(cached.created) < 3600 * 1000) return { ...cached, cached: true };
 
   const items = (await gnews(q, "7d")).slice(0, 30);
+  const imgP = fillImages(items, 10);
   if (!items.length) throw new Error("ยังไม่พบข่าวของเรื่องนี้ใน 7 วันล่าสุด");
 
   const prompt = `คุณคือนักข่าวที่เป็นกลาง รวบรวมข่าวทั้งหมดด้านล่างของเรื่อง "${q}" แล้วเล่าเป็นเรื่องเดียว
@@ -460,6 +510,7 @@ timeline เรียงจากเก่าไปใหม่ refs คือ�
 ${items.map((it, i) => `[${i}] ${it.date} | ${it.source} | ${it.title} | เกี่ยวข้อง:${it.related}`).join("\n")}`;
 
   const ai = await gemini(env, [{ text: prompt }], 8192);
+  await imgP;
   const out = {
     q,
     title: clean(ai.title || q, 120),
@@ -474,7 +525,7 @@ ${items.map((it, i) => `[${i}] ${it.date} | ${it.source} | ${it.title} | เก�
     sides: (ai.sides || []).slice(0, 5).map(s => ({ name: clean(s.name, 60), stance: clean(s.stance, 400) })),
     conflicts: (ai.conflicts || []).slice(0, 5).map(c => clean(c, 300)),
     watch: (ai.watch || []).slice(0, 5).map(c => clean(c, 300)),
-    sources: items.map(it => ({ title: it.title, source: it.source, link: it.link, date: it.date })),
+    sources: items.map(it => ({ title: it.title, source: it.source, link: it.link, date: it.date, image: it.image || "" })),
     created: new Date().toISOString(),
   };
   await putJSON(env, key, out, 7 * 86400);

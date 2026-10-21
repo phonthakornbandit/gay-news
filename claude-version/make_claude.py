@@ -43,7 +43,8 @@ rep('''    ok: "ตกลง", cancel: "ยกเลิก", retry: "ลอง�
     storyEmpty: "ยังไม่มีข่าวในเรื่องนี้\\nวางข่าวด้านล่างเพื่อเริ่มสรุป", rebuild: "อัปเดตสรุป",
     transcript: "วางคำบรรยาย / transcript ของคลิป", transcriptPh: "เช่น คัดลอกจาก YouTube › แสดงข้อความถอดเสียง",
     clipTitle: "ชื่อคลิปหรือลิงก์ (ไม่บังคับ)", noAI: "ต้องเปิดหน้านี้ใน claude.ai เพื่อใช้ Claude",
-    aiBy: "สรุปโดย Claude",''')
+    aiBy: "สรุปโดย Claude",
+    needText: "เวอร์ชันนี้ค้นข่าวจากอินเทอร์เน็ตเองไม่ได้ ให้วางเนื้อข่าวหรือบทความ (หรือใช้เว็บหลัก phonthakornbandit.github.io/gay-news ที่ค้นข่าวจากคำค้นและมีรูปข่าว)",''')
 rep('''    ok: "OK", cancel: "Cancel", retry: "Retry", setUrl: "WORKER_URL is not set in index.html",''',
     '''    ok: "OK", cancel: "Cancel", retry: "Retry", setUrl: "",
     pasteNews: "Paste news, links or articles", pasteNewsPh: "Paste several articles at once, copied from news sites, apps or posts",
@@ -52,7 +53,8 @@ rep('''    ok: "OK", cancel: "Cancel", retry: "Retry", setUrl: "WORKER_URL is no
     storyEmpty: "No coverage in this story yet\\nPaste news below to start", rebuild: "Rebuild summary",
     transcript: "Paste the video's captions / transcript", transcriptPh: "e.g. copy from YouTube › Show transcript",
     clipTitle: "Video title or link (optional)", noAI: "Open this page in claude.ai to use Claude",
-    aiBy: "Summarized by Claude",''')
+    aiBy: "Summarized by Claude",
+    needText: "This version can't search the web. Paste the article text (or use the main site, which searches by keyword and shows photos)",''')
 rep('loadingNews: "กำลังดึงข่าวและให้ AI สรุป…\\nประมาณ 20–40 วินาที"', 'loadingNews: "Claude กำลังแยกและสรุปข่าว…\\nประมาณ 20–60 วินาที"')
 rep('loadingNews: "Fetching news and summarizing…\\nabout 20–40 seconds"', 'loadingNews: "Claude is sorting and summarizing…\\nabout 20–60 seconds"')
 rep('go: n => `ยืนยัน · จัดข่าวให้ฉัน ${n} หัวข้อ`', 'go: n => `ยืนยัน · ให้ Claude จัดข่าว ${n} หัวข้อ`')
@@ -122,6 +124,7 @@ async function api(path, data = {}){
     case "/news": {
       const text = String(data.text || "").trim();
       if (!text) throw new Error(L().pasteNewsPh);
+      if (text.length < 60 && !/https?:\/\//.test(text) && !text.includes("\n")) throw new Error(L().needText);
       const topics = (data.topics || []).slice(0, 12);
       const total = [10,20,30].includes(Number(p.newsCount)) ? Number(p.newsCount) : 20;
       const prompt = `คุณคือบรรณาธิการข่าวที่เป็นกลาง ผู้ใช้วางข้อความด้านล่าง ซึ่งอาจมีข่าวหลายชิ้น หัวข่าว ลิงก์ หรือโพสต์ปนกัน
@@ -300,7 +303,7 @@ rep('''  if (s.error) return head + `<div class="err">${esc(s.error)}</div><butt
   if (s.empty) return head + `<div class="loading" style="white-space:pre-line;padding:20px 0">${esc(t.storyEmpty)}</div>${addBox}<button class="btn ghost small" id="unfollowBtn">${esc(t.unfollow)}</button>`;''')
 rep('''<div class="row" style="font-size:12px;gap:6px"><span class="tag ${/จบ|คลี่/.test(s.status)?"":"hot"}">${esc(s.status)}</span><span style="color:var(--faint)">${esc(ago(s.created))}</span></div>''',
     '''<div class="row" style="font-size:12px;gap:6px"><span class="tag ${/จบ|คลี่/.test(s.status)?"":"hot"}">${esc(s.status)}</span><span style="color:var(--faint)">${esc(ago(s.created))} · ${s.count||0} ชิ้น</span></div>''')
-rep('''    ${s.sources.map(x => `<a class="listrow" href="${safeUrl(x.link)}" target="_blank" rel="noopener" style="color:var(--ink)"><span>${esc(x.title)}<br><span class="muted" style="font-size:12px">${esc(x.source)} · ${esc(ago(x.date))}</span></span><span class="muted">↗</span></a>`).join("")}</section>''',
+rep('''    ${s.sources.map(x => `<a class="listrow" href="${safeUrl(x.link)}" target="_blank" rel="noopener" style="color:var(--ink)"><span class="srow">${x.image?`<img src="${safeUrl(x.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:""}<span>${esc(x.title)}<br><span class="muted" style="font-size:12px">${esc(x.source)} · ${esc(ago(x.date))}</span></span></span><span class="muted">↗</span></a>`).join("")}</section>''',
     '''    ${s.sources.map(x => x.link ? `<a class="listrow" href="${safeUrl(x.link)}" target="_blank" rel="noopener" style="color:var(--ink)"><span>${esc(x.title)}<br><span class="muted" style="font-size:12px">${esc(x.source)} ${esc(x.date)}</span></span><span class="muted">↗</span></a>` : `<div class="listrow"><span>${esc(x.title)}<br><span class="muted" style="font-size:12px">${esc(x.source)} ${esc(x.date)}</span></span></div>`).join("")}</section>
   ${addBox}''')
 rep('''${s&&!s.error?`<button class="icon-btn" id="storyRefresh" aria-label="${esc(t.refresh)}">${svg("refresh",20)}</button>`:""}</div>''',
