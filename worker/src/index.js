@@ -148,8 +148,7 @@ async function gemini(env, parts, maxTokens = 8192) {
   if (!env.GEMINI_API_KEY) throw new Error("ยังไม่ได้ตั้ง GEMINI_API_KEY ใน Cloudflare");
   const limit = Number(env.DAILY_LIMIT) || 300;
   if ((Number(await env.NEWS.get(`usage:${today()}`)) || 0) >= limit) throw new Error(`ใช้ AI ครบ ${limit} ครั้งของวันนี้แล้ว (เพดานกันใช้เกิน) ลองใหม่พรุ่งนี้`);
-  // รุ่นหลัก + รุ่นสำรอง (ตั้งได้ใน Cloudflare: MODEL และ MODEL_FALLBACK คั่นด้วย ,)
-  const models = [env.MODEL || DEFAULT_MODEL, ...String(env.MODEL_FALLBACK || "").split(",").map(x => x.trim()).filter(Boolean)];
+  const models = [env.MODEL || DEFAULT_MODEL, ...(env.MODEL_FALLBACK ? String(env.MODEL_FALLBACK).split(",").map(x => x.trim()).filter(Boolean) : [])];
   let lastMsg = "";
   for (const model of models) {
     for (let attempt = 0; attempt < 3; attempt++) {
@@ -169,21 +168,19 @@ async function gemini(env, parts, maxTokens = 8192) {
         await bumpUsage(env);
         const text = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || "").join("");
         if (!text) throw new Error("ไม่ได้รับผลจาก AI (คลิปหรือข่าวอาจถูกจำกัด)");
-        try {
-          return JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, ""));
-        } catch {
-          throw new Error("AI ตอบกลับมาไม่ครบ ลองกดใหม่อีกครั้ง");
-        }
+        try { return JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, "")); }
+        catch { throw new Error("AI ตอบกลับมาไม่ครบ ลองกดใหม่อีกครั้ง"); }
       }
       lastMsg = (data.error && data.error.message) || `Gemini ตอบกลับผิดพลาด (${res.status})`;
-      const busy = res.status === 503 || res.status === 500 || /high demand|overloaded|unavailable/i.test(lastMsg);
-      const quota = res.status === 429 || /quota|RESOURCE_EXHAUSTED/i.test(lastMsg);
-      if (busy && attempt < 2) { await new Promise(r => setTimeout(r, 1500 * (attempt + 1) ** 2)); continue; }
-      if (busy || quota || res.status === 404) break; // ลองรุ่นสำรองถัดไป
-      throw new Error(lastMsg);
+      if (/location is not supported/i.test(lastMsg)) {
+        throw new Error("Gemini ปฏิเสธเพราะเซิร์ฟเวอร์ Cloudflare ที่รับคำขออยู่ในประเทศที่ Google ไม่รองรับ (ระบบตั้งให้ Worker รันในสหรัฐฯ แล้ว ถ้ายังเจอ ให้ตรวจว่า deploy เวอร์ชันล่าสุดผ่านหรือยัง)");
+      }
+      const busy = res.status === 503 || res.status === 500 || /high demand|overloaded|UNAVAILABLE/i.test(lastMsg);
+      if (!busy) break; // error อื่น ไม่ต้องลองซ้ำกับรุ่นนี้
+      if (attempt < 2) await new Promise(r => setTimeout(r, 1500 * (attempt + 1) ** 2));
     }
   }
-  if (/high demand|overloaded|unavailable/i.test(lastMsg)) throw new Error("ตอนนี้ AI ของ Google มีคนใช้เยอะมาก (ชั่วคราว) รอสัก 1–2 นาทีแล้วกดลองใหม่");
+  if (/high demand|overloaded|UNAVAILABLE/i.test(lastMsg)) throw new Error("ตอนนี้ Gemini มีผู้ใช้มาก ระบบลองซ้ำให้แล้วยังไม่ผ่าน รอสักครู่แล้วกดใหม่");
   throw new Error(lastMsg);
 }
 

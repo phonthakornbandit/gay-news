@@ -2,6 +2,10 @@ name = "gay-news"
 main = "src/index.js"
 compatibility_date = "2025-09-01"
 
+# ให้ Worker รันในสหรัฐฯ เสมอ (Gemini API ไม่รองรับบางประเทศ เช่น ฮ่องกง ที่ Cloudflare อาจส่งคำขอผ่าน)
+[placement]
+region = "aws:us-east-1"
+
 # KV namespace "NEWS"
 [[kv_namespaces]]
 binding = "NEWS"
