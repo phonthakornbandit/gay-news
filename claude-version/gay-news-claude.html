@@ -1,0 +1,852 @@
+
+
+<title>GAY News</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFFFFF; --surface:#FFFFFF; --soft:#F7F8FA; --soft2:#F2F3F6; --line:#E4E7EC; --line2:#EEF0F3;
+  --ink:#15171C; --ink2:#3F4450; --muted:#5B6170; --faint:#6B7280;
+  --accent:#1747C9; --accent-soft:#E8EDFB; --on-accent:#FFFFFF;
+  --hero:#15171C; --hero-ink:#FFFFFF; --hero-sub:#B9C6F0;
+  --warn-bg:#FFF7E6; --warn-ink:#8A5300; --hot-bg:#FFF0EB; --hot-ink:#B93815;
+  --overlay:rgba(21,23,28,.45); --fs:16px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]):not([data-gn="light"]){--bg:#0F1115;--surface:#161920;--soft:#1C2029;--soft2:#232833;--line:#2C323E;--line2:#242A34;--ink:#ECEEF2;--ink2:#C5CAD3;--muted:#A3AAB6;--faint:#959DAA;--accent:#7FA2FF;--accent-soft:#1E2A4A;--on-accent:#0F1115;--hero:#1E2A4A;--hero-ink:#FFFFFF;--hero-sub:#B9C6F0;--warn-bg:#2E2412;--warn-ink:#F2C97A;--hot-bg:#3A1F17;--hot-ink:#FFB59E;--overlay:rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme="dark"],:root[data-gn="dark"]{color-scheme:dark;
+  --bg:#0F1115; --surface:#161920; --soft:#1C2029; --soft2:#232833; --line:#2C323E; --line2:#242A34;
+  --ink:#ECEEF2; --ink2:#C5CAD3; --muted:#A3AAB6; --faint:#959DAA;
+  --accent:#7FA2FF; --accent-soft:#1E2A4A; --on-accent:#0F1115;
+  --hero:#1E2A4A; --hero-ink:#FFFFFF; --hero-sub:#B9C6F0;
+  --warn-bg:#2E2412; --warn-ink:#F2C97A; --hot-bg:#3A1F17; --hot-ink:#FFB59E;
+  --overlay:rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{padding-left:max(0px,env(safe-area-inset-left,0px));padding-right:max(0px,env(safe-area-inset-right,0px))}
+body{background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans Thai',system-ui,sans-serif;font-size:var(--fs);-webkit-text-size-adjust:100%}
+a{color:var(--accent);text-decoration:none}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.app{max-width:560px;margin:0 auto;height:100%;display:flex;flex-direction:column;background:var(--bg);position:relative;overflow:hidden}
+header.top{height:60px;flex-shrink:0;display:flex;align-items:center;gap:4px;padding:0 8px 0 16px;border-bottom:1px solid var(--line2)}
+.brand{display:flex;align-items:center;gap:10px;color:var(--ink);flex:1;background:none;border:none;padding:0;text-align:left}
+.logo{width:32px;height:32px;border-radius:9px;background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px}
+.brand b{font-size:19px;letter-spacing:-.3px}
+.icon-btn{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:none;background:none;border-radius:12px;color:var(--ink)}
+.icon-btn:active{background:var(--soft2)}
+main.view{flex:1;min-height:0;overflow-y:auto;padding:18px max(16px,env(safe-area-inset-right,0px)) 20px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:16px}
+main.view>*{flex-shrink:0}
+nav.tabs{height:64px;flex-shrink:0;border-top:1px solid var(--line2);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs button{border:none;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--faint);font-size:12px}
+nav.tabs button.on{color:var(--ink);font-weight:600}
+h1{margin:0;font-size:26px;line-height:1.3}
+h2{margin:0;font-size:16px}
+.muted{color:var(--muted);font-size:13px}
+.label{font-size:13px;font-weight:600;color:var(--muted)}
+.row{display:flex;align-items:center;gap:8px}
+.between{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}
+.chip{height:38px;padding:0 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);font-size:14px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.chip.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.chip.dash{border-style:dashed;color:var(--muted)}
+.chip .x{opacity:.6;font-size:16px;line-height:1}
+.seg{display:grid;gap:4px;background:var(--soft2);border-radius:12px;padding:4px}
+.seg button{height:36px;border:none;border-radius:9px;background:transparent;font-size:14px;color:var(--muted)}
+.seg button.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.btn{height:52px;border-radius:14px;border:none;background:var(--accent);color:var(--on-accent);font-size:16px;font-weight:600;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn:disabled{opacity:.5}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1.5px solid var(--line)}
+.btn.small{height:40px;font-size:14px;border-radius:10px}
+.card{border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
+.hero{border-radius:16px;background:var(--hero);color:var(--hero-ink);padding:16px;display:flex;flex-direction:column;gap:6px}
+.hero small{font-size:12px;font-weight:600;color:var(--hero-sub)}
+.hero p{margin:0;line-height:1.6;font-size:15px}
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;background:var(--soft2);color:var(--ink2)}
+.tag.a{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.tag.hot{background:var(--hot-bg);color:var(--hot-ink);font-weight:600}
+.card h3{margin:0;font-size:16px;line-height:1.45}
+.card ul{margin:0;padding-left:18px;font-size:14px;line-height:1.6;color:var(--ink2)}
+.card .foot{display:flex;align-items:center;justify-content:space-between;padding-top:4px;border-top:1px solid var(--line2)}
+.card .acts{display:flex}
+.card .acts button,.card .acts a{width:40px;height:40px;border:none;background:none;display:flex;align-items:center;justify-content:center;color:var(--ink);border-radius:10px}
+.card .acts .on{color:var(--accent)}
+input.field,textarea.field,select.field{width:100%;min-height:48px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);padding:10px 14px;font-size:16px}
+textarea.field{min-height:140px;line-height:1.55;resize:vertical}
+input.field:focus,textarea.field:focus{outline:2px solid var(--accent);outline-offset:0;border-color:transparent}
+.end{display:flex;align-items:center;gap:10px;color:var(--faint);font-size:13px;padding:6px 0}
+.end:before,.end:after{content:"";flex:1;height:1px;background:var(--line)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.w{background:var(--soft);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.w b{font-size:11px;color:var(--accent);letter-spacing:.3px}
+.w span{font-size:13px;line-height:1.45}
+.tl{display:flex;gap:12px}
+.tl .rail{display:flex;flex-direction:column;align-items:center;width:14px}
+.tl .dot{width:12px;height:12px;border-radius:50%;border:2.5px solid var(--accent);background:var(--bg);margin-top:5px}
+.tl .ln{flex:1;width:2px;background:var(--accent-soft)}
+.tl .body{display:flex;flex-direction:column;gap:2px;padding-bottom:14px;flex:1;font-size:14px;line-height:1.5}
+.tl .when{font-size:12px;font-weight:600;color:var(--accent)}
+.box{border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.6}
+.box.soft{background:var(--soft)}
+.box.warn{background:var(--warn-bg)}
+.box.warn b{color:var(--warn-ink)}
+p.txt{margin:0;font-size:14px;line-height:1.75;color:var(--ink2);white-space:pre-line}
+.listrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line2);font-size:14px;background:none;border-left:none;border-right:none;border-top:none;width:100%;text-align:left}
+.spin{width:22px;height:22px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:sp 0.8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.loading{display:flex;flex-direction:column;align-items:center;gap:12px;padding:40px 0;color:var(--muted);font-size:14px;text-align:center}
+.err{background:var(--hot-bg);color:var(--hot-ink);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.5}
+.drawer-wrap{position:absolute;inset:0;background:var(--overlay);display:none;justify-content:flex-end;z-index:20}
+.drawer-wrap.open{display:flex}
+.drawer{width:min(320px,86%);height:100%;background:var(--surface);display:flex;flex-direction:column;box-shadow:-8px 0 24px rgba(0,0,0,.15);overflow-y:auto}
+.drawer .hd{height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 20px;border-bottom:1px solid var(--line2);flex-shrink:0}
+.mi{display:flex;align-items:center;gap:14px;min-height:56px;padding:0 12px;border:none;background:none;border-radius:12px;text-align:left;width:100%}
+.mi:active{background:var(--soft2)}
+.mi .ic{width:36px;height:36px;border-radius:10px;background:var(--soft2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mi .t{display:flex;flex-direction:column}
+.mi .t span:first-child{font-size:15px;font-weight:500}
+.mi .t span:last-child{font-size:12px;color:var(--muted)}
+.avatar{width:48px;height:48px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;flex-shrink:0}
+.sheet-wrap{position:absolute;inset:0;background:var(--overlay);display:none;align-items:flex-end;z-index:30}
+.sheet-wrap.open{display:flex}
+.sheet{width:100%;max-height:92%;background:var(--surface);border-radius:20px 20px 0 0;display:flex;flex-direction:column}
+.sheet .hd{display:flex;align-items:center;justify-content:space-between;padding:10px 8px 10px 20px;border-bottom:1px solid var(--line2)}
+.sheet .bd{padding:16px 20px 24px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+.toast{position:absolute;left:50%;bottom:84px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;z-index:40;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%;text-align:center}
+.toast.show{opacity:1}
+.login{flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:24px}
+.home{justify-content:flex-start}
+.home .grow{flex:1}
+.ask{flex-shrink:0;display:flex;gap:8px;padding:10px 16px;border-top:1px solid var(--line2);background:var(--bg)}
+.ask input{flex:1;height:44px;min-height:44px}
+.sq{width:44px;height:44px;border-radius:12px;border:none;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.yt{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:var(--soft2)}
+.yt img{width:100%;height:100%;object-fit:cover;display:block}
+.mom{display:flex;gap:10px;font-size:14px;color:var(--ink);line-height:1.5}
+.mom b{color:var(--accent);min-width:48px}
+.sec{display:flex;flex-direction:column;gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line2)}
+.sec p{margin:0;font-size:14px;line-height:1.65}
+textarea.paste{min-height:120px}
+.hint{font-size:12px;color:var(--faint);line-height:1.5}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (min-width:600px){.app{border-left:1px solid var(--line2);border-right:1px solid var(--line2)}}
+</style>
+
+<div class="app" id="app">
+  <header class="top" id="topbar" hidden>
+    <button class="brand" id="brand" aria-label="GAY News หน้าแรก"><span class="logo">G</span><b>GAY News</b></button>
+    <button class="icon-btn" id="menuBtn" aria-label="เปิดเมนู">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </header>
+  <main class="view" id="view"></main>
+  <div id="askBar"></div>
+  <nav class="tabs" id="tabs" hidden></nav>
+
+  <div class="drawer-wrap" id="drawerWrap"><div class="drawer" id="drawer" role="dialog" aria-label="เมนู"></div></div>
+  <div class="sheet-wrap" id="sheetWrap"><div class="sheet" id="sheet" role="dialog"></div></div>
+  <div class="toast" id="toast" role="status"></div>
+</div>
+
+<script>
+/* =================== ตั้งค่า =================== */
+
+/* =================== ข้อความ 2 ภาษา =================== */
+const T = {
+  th: {
+    hello: ["สวัสดีตอนเช้า","สวัสดีตอนบ่าย","สวัสดีตอนเย็น","สวัสดีตอนดึก"],
+    ask: "วันนี้อยากรู้เรื่องอะไร?", topics: "หัวข้อ (เลือกได้หลายอัน)", same: "เหมือนเมื่อวาน",
+    add: "+ เพิ่มเอง", len: "ความยาวสรุป", short: "สั้น", mid: "กลาง", long: "ละเอียด",
+    period: "ช่วงเวลา", d1: "24 ชม.", d3: "3 วัน", d7: "7 วัน",
+    go: n => `ยืนยัน · ให้ Claude จัดข่าว ${n} หัวข้อ`, rec: "ให้ AI แนะนำข่าววันนี้", recT: "AI แนะนำวันนี้",
+    why: "ทำไมแนะนำ", outside: "นอกความสนใจ",
+    tabNews: "ข่าววันนี้", tabFollow: "ติดตาม", tabVideo: "สรุปวิดีโอ",
+    yourNews: "ข่าวของคุณ", overview: "ภาพรวมวันนี้ · สรุปโดย AI", all: "ทั้งหมด", done: "อ่านครบแล้ว",
+    by: n => `รายงานโดย ${n} สำนัก`, loadingNews: "Claude กำลังแยกและสรุปข่าว…\nประมาณ 20–60 วินาที",
+    follows: "เรื่องที่ติดตาม", addFollow: "+ ติดตามคำค้น", noFollow: "ยังไม่ได้ติดตามเรื่องไหน\nกด 📌 บนการ์ดข่าว หรือเพิ่มคำค้นเอง",
+    loadingStory: "Claude กำลังเรียบเรียงเรื่องนี้…", story: "เล่าเรื่อง", analogy: "เปรียบให้เห็นภาพ", timeline: "ไทม์ไลน์",
+    sides: "แต่ละฝ่ายว่าอย่างไร", conflicts: "ข้อมูลที่ยังขัดกัน", watch: "ต้องจับตาต่อ", sources: "แหล่งข่าว",
+    askAI: "ถาม AI เกี่ยวกับเรื่องนี้…", unfollow: "เลิกติดตาม", refresh: "อัปเดตใหม่",
+    W: { who:"ใคร", what:"ทำอะไร", where:"ที่ไหน", when:"เมื่อไร", why:"ทำไม", how:"อย่างไร" },
+    video: "สรุปวิดีโอ", ytLink: "ลิงก์ YouTube", modeSum: "สรุป", modeFull: "จัดคำบรรยาย",
+    goSum: "สรุปคลิปนี้", goFull: "จัดคำบรรยายเป็นช่วง", loadingVideo: "Claude กำลังอ่านคำบรรยาย…",
+    moments: "ช่วงสำคัญในคลิป", copy: "คัดลอก", history: "ที่เคยสรุป", aiNote: "สรุป/ถอดความโดย AI อาจคลาดเคลื่อน ตรวจกับต้นทางก่อนอ้างอิง",
+    menu: "เมนู", profile: "แก้ไขโปรไฟล์", profileS: "ชื่อ หัวข้อเริ่มต้น", prompt: "แก้ไข Prompt AI", promptS: "สไตล์การสรุปแต่ละงาน",
+    theme: "โทนสว่าง / มืด", lang: "ภาษา", settings: "ตั้งค่า", settingsS: "ตัวอักษร จำนวนข่าว", saved: "ข่าวที่บันทึก",
+    logout: "ออกจากระบบ", quota: "ใช้ AI วันนี้", light: "สว่าง", dark: "มืด", auto: "ตามเครื่อง",
+    uiLang: "ภาษาหน้าเว็บ", sumLang: "ภาษาของสรุป", save: "บันทึก", reset: "คืนค่าเริ่มต้น",
+    name: "ชื่อที่ใช้ทักทาย", font: "ขนาดตัวอักษร", count: "จำนวนข่าวต่อครั้ง",
+    p1: "โปรไฟล์ 1", p2: "โปรไฟล์ 2", switchTo: "สลับเป็นโปรไฟล์", pwd: "รหัสผ่าน", login: "เข้าสู่ระบบ", loginSub: "ใส่รหัสผ่านของคุณ (แต่ละคนมีรหัสของตัวเอง)",
+    saved1: "บันทึกแล้ว", copied: "คัดลอกแล้ว", followed: "ติดตามแล้ว",
+    promptHelp: "เขียนสไตล์ที่ต้องการ เช่น \"อธิบายแบบเด็ก ม.ปลาย\" หรือ \"เน้นตัวเลขและผลกระทบต่อเงินในกระเป๋า\" ระบบจะใช้รูปแบบผลลัพธ์เดิมเสมอ",
+    pNews: "สรุปข่าววันนี้", pRec: "ข่าวแนะนำ", pStory: "สรุปเรื่องที่ติดตาม", pVideo: "สรุปวิดีโอ",
+    presets: ["เป็นกลาง กระชับ","อธิบายแบบเด็ก ม.ปลาย","เน้นตัวเลขและข้อมูล","มุมมองผลกระทบต่อคนทั่วไป"],
+    noSaved: "ยังไม่มีข่าวที่บันทึก", newTopic: "พิมพ์หัวข้อ เช่น ค่าแรง, ประกันสังคม", newFollow: "พิมพ์คำค้น เช่น ชุมนุม ทำเนียบ",
+    ok: "ตกลง", cancel: "ยกเลิก", retry: "ลองใหม่", setUrl: "",
+    pasteNews: "วางข่าว ลิงก์ หรือบทความ", pasteNewsPh: "วางเนื้อข่าวหลายชิ้นได้ในครั้งเดียว เช่น คัดลอกจากเว็บข่าว แอปข่าว หรือโพสต์",
+    pasteHint: "Claude จะแยกเป็นข่าวทีละชิ้น จัดตามหัวข้อที่เลือก และสรุปจากข้อความที่วางเท่านั้น",
+    lastFeed: "ข่าวชุดล่าสุด", addToStory: "เพิ่มข่าวในเรื่องนี้", addToStoryPh: "วางข่าวใหม่ของเรื่องนี้ แล้ว Claude จะรวมเข้าไทม์ไลน์",
+    storyEmpty: "ยังไม่มีข่าวในเรื่องนี้\nวางข่าวด้านล่างเพื่อเริ่มสรุป", rebuild: "อัปเดตสรุป",
+    transcript: "วางคำบรรยาย / transcript ของคลิป", transcriptPh: "เช่น คัดลอกจาก YouTube › แสดงข้อความถอดเสียง",
+    clipTitle: "ชื่อคลิปหรือลิงก์ (ไม่บังคับ)", noAI: "ต้องเปิดหน้านี้ใน claude.ai เพื่อใช้ Claude",
+    aiBy: "สรุปโดย Claude",
+  },
+  en: {
+    hello: ["Good morning","Good afternoon","Good evening","Good night"],
+    ask: "What do you want to know today?", topics: "Topics (pick several)", same: "Same as yesterday",
+    add: "+ Add", len: "Summary length", short: "Short", mid: "Medium", long: "Detailed",
+    period: "Time range", d1: "24 h", d3: "3 days", d7: "7 days",
+    go: n => `Confirm · Get my news (${n})`, rec: "Ask AI for today's picks", recT: "AI picks for today",
+    why: "Why", outside: "Outside your interests",
+    tabNews: "Today", tabFollow: "Following", tabVideo: "Video",
+    yourNews: "Your news", overview: "Today at a glance · AI summary", all: "All", done: "You're all caught up",
+    by: n => `Reported by ${n} outlets`, loadingNews: "Claude is sorting and summarizing…\nabout 20–60 seconds",
+    follows: "Following", addFollow: "+ Follow a keyword", noFollow: "Not following anything yet\nTap 📌 on a news card or add a keyword",
+    loadingStory: "AI is gathering coverage…", story: "The story", analogy: "In simple terms", timeline: "Timeline",
+    sides: "What each side says", conflicts: "Conflicting reports", watch: "What to watch", sources: "Sources",
+    askAI: "Ask AI about this story…", unfollow: "Unfollow", refresh: "Refresh",
+    W: { who:"Who", what:"What", where:"Where", when:"When", why:"Why", how:"How" },
+    video: "Video summary", ytLink: "YouTube link", modeSum: "Summary", modeFull: "Organize transcript",
+    goSum: "Summarize this video", goFull: "Organize the transcript", loadingVideo: "AI is watching the video…\nLong videos can take 1–3 minutes",
+    moments: "Key moments", copy: "Copy", history: "History", aiNote: "AI-generated; may contain errors. Check the source before quoting.",
+    menu: "Menu", profile: "Edit profile", profileS: "Name, default topics", prompt: "Edit AI prompts", promptS: "Style for each task",
+    theme: "Light / dark", lang: "Language", settings: "Settings", settingsS: "Font size, news count", saved: "Saved news",
+    logout: "Sign out", quota: "AI calls today", light: "Light", dark: "Dark", auto: "System",
+    uiLang: "Interface language", sumLang: "Summary language", save: "Save", reset: "Reset to default",
+    name: "Display name", font: "Font size", count: "News per batch",
+    p1: "Profile 1", p2: "Profile 2", switchTo: "Switch to profile", pwd: "Password", login: "Sign in", loginSub: "Enter your password (each person has their own)",
+    saved1: "Saved", copied: "Copied", followed: "Following",
+    promptHelp: "Describe the style you want, e.g. \"explain like I'm 16\". The output format always stays the same.",
+    pNews: "Daily news", pRec: "Recommendations", pStory: "Followed stories", pVideo: "Video summary",
+    presets: ["Neutral and concise","Explain like I'm 16","Focus on numbers","Impact on everyday people"],
+    noSaved: "No saved news yet", newTopic: "Type a topic", newFollow: "Type a keyword",
+    ok: "OK", cancel: "Cancel", retry: "Retry", setUrl: "",
+    pasteNews: "Paste news, links or articles", pasteNewsPh: "Paste several articles at once, copied from news sites, apps or posts",
+    pasteHint: "Claude splits them into stories, sorts them by your topics and summarizes only what you pasted",
+    lastFeed: "Last batch", addToStory: "Add news to this story", addToStoryPh: "Paste new coverage and Claude will merge it into the timeline",
+    storyEmpty: "No coverage in this story yet\nPaste news below to start", rebuild: "Rebuild summary",
+    transcript: "Paste the video's captions / transcript", transcriptPh: "e.g. copy from YouTube › Show transcript",
+    clipTitle: "Video title or link (optional)", noAI: "Open this page in claude.ai to use Claude",
+    aiBy: "Summarized by Claude",
+  }
+};
+const BASE_TOPICS = ["เศรษฐกิจ","การเมือง","ไอที","สุขภาพ","ต่างประเทศ","สังคม","กีฬา","บันเทิง","LGBTQ+"];
+
+/* =================== สถานะ =================== */
+const S = {
+  user: lsGet("gn_user") === "u2" ? "u2" : "jo", ready: false, prefs: null,
+  tab: "news", screen: "home", feed: null, filter: "all", rec: null, recOpen: false,
+  follows: [], storyQ: null, story: null, saved: [],
+  vMode: "sum", vResult: null, vHistory: [], busy: false, err: null,
+};
+const $ = id => document.getElementById(id);
+const L = () => T[(S.prefs && S.prefs.uiLang) || "th"];
+
+function lsGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
+function lsSet(k,v){ try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k,v); } catch(e){} }
+function esc(s){ return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function safeUrl(u){ return /^https?:\/\//i.test(String(u||"")) ? esc(u) : "#"; }
+function toSec(t){ return String(t||"0").split(":").reduce((a,b)=>a*60+(Number(b)||0),0); }
+function ago(d){
+  const t = Date.parse(d); if (!t) return "";
+  const m = Math.max(1, Math.round((Date.now()-t)/60000)), th = (S.prefs||{}).uiLang !== "en";
+  if (m < 60) return th ? `${m} นาทีที่แล้ว` : `${m}m ago`;
+  const h = Math.round(m/60); if (h < 24) return th ? `${h} ชม.ที่แล้ว` : `${h}h ago`;
+  const dd = Math.round(h/24); return th ? `${dd} วันที่แล้ว` : `${dd}d ago`;
+}
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),1800); }
+
+const I = {
+  news:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/>',
+  follow:'<path d="M6 4h12v16l-6-4-6 4z"/>',
+  video:'<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.5v5l4.5-2.5z"/>',
+  back:'<path d="M15 5l-7 7 7 7"/>', close:'<path d="M6 6l12 12M18 6L6 18"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>', share:'<path d="M7 17L17 7M9 7h8v8"/>',
+  spark:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
+  send:'<path d="M5 12h14M13 6l6 6-6 6"/>', refresh:'<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/>',
+  user:'<path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0"/>',
+  prompt:'<path d="M4 6h16M4 12h10M4 18h7M17 15l3 3-3 3"/>',
+  sun:'<path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6.3 6.3l1.4 1.4M16.3 16.3l1.4 1.4M6.3 17.7l1.4-1.4M16.3 7.7l1.4-1.4"/><circle cx="12" cy="12" r="4"/>',
+  globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  bookmark:'<path d="M6 4h12v16l-6-4-6 4z"/>', logout:'<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>',
+};
+const svg = (k,s=20,w=2) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[k]}</svg>`;
+
+/* =================== Claude + ที่เก็บข้อมูล (ใน claude.ai) =================== */
+const DEFAULT_PREFS = { name:"", topics:["เศรษฐกิจ","ไอที"], customTopics:[], length:"mid", period:"1d", theme:"auto", uiLang:"th", sumLang:"th", newsCount:20, fontSize:"m", styles:{ news:"", recommend:"", story:"", video:"" } };
+let DB = null, SAMPLE = null;
+const MEM = {};
+const caps = (async () => {
+  try { DB = await window.claude?.use?.("db"); } catch(e){ DB = null; }
+  try { SAMPLE = await window.claude?.use?.("sample"); } catch(e){ SAMPLE = null; }
+})();
+function h32(s){ let x = 5381; for (const c of String(s)) x = ((x << 5) + x + c.codePointAt(0)) >>> 0; return x.toString(36); }
+const P = (k) => `gn/${S.user}/${k}`;
+async function dget(path, fb){
+  await caps;
+  if (DB){ try { const s = await DB.doc(path).get(); if (s.exists){ const d = s.data(); return d && "v" in d ? d.v : fb; } return fb; } catch(e){ return MEM[path] ?? fb; } }
+  return MEM[path] ?? fb;
+}
+async function dset(path, v){
+  MEM[path] = v; await caps;
+  if (DB){ try { await DB.doc(path).set({ v }); } catch(e){ console.warn("db write failed", e); } }
+}
+async function ddel(path){ delete MEM[path]; await caps; if (DB){ try { await DB.doc(path).delete(); } catch(e){} } }
+const clip = (s, n) => String(s ?? "").replace(/[\u0000-\u0008\u000b-\u001f]/g, " ").trim().slice(0, n);
+function fitBytes(s, max){
+  const enc = new TextEncoder(); s = String(s || "");
+  if (enc.encode(s).length <= max) return s;
+  let lo = 0, hi = s.length;
+  while (lo < hi){ const m = (lo + hi + 1) >> 1; if (enc.encode(s.slice(0, m)).length <= max) lo = m; else hi = m - 1; }
+  return s.slice(0, lo) + "\n…(ตัดส่วนที่เกินออก)";
+}
+function langLine(p){ return p.sumLang === "en" ? "Write every text value in English." : "เขียนข้อความทั้งหมดเป็นภาษาไทย"; }
+function styleLine(p, k){ const s = clip(p.styles && p.styles[k], 1500); return s ? `\n\nสไตล์เพิ่มเติมที่ผู้ใช้กำหนด (ใช้กับน้ำเสียงและการเรียบเรียงเท่านั้น ห้ามเปลี่ยนรูปแบบ JSON):\n${s}` : ""; }
+async function ai(prompt, tier){
+  await caps;
+  if (!SAMPLE) throw new Error(L().noAI);
+  try { return await SAMPLE.json(fitBytes(prompt, 60000), { modelTier: tier || "default" }); }
+  catch(e){
+    const c = e && e.code;
+    if (c === "not_granted") throw new Error("ยังไม่ได้อนุญาตให้หน้านี้ใช้ Claude กดลองใหม่แล้วกดอนุญาต");
+    if (c === "rate_limited") throw new Error("ใช้ Claude ถี่เกินไป รอสักครู่แล้วลองใหม่");
+    if (c === "prompt_too_large") throw new Error("ข้อความยาวเกินไป ลองวางทีละส่วน");
+    if (c === "invalid_json") throw new Error("Claude ตอบกลับไม่ครบ กดลองใหม่อีกครั้ง หรือวางข้อความให้สั้นลง");
+    throw new Error((e && e.message) || "เรียก Claude ไม่สำเร็จ");
+  }
+}
+const LENGTH_RULE = { short:"points มี 1 ข้อ สั้นมาก", mid:"points มี 2-3 ข้อ", long:"points มี 4-5 ข้อ แต่ละข้ออธิบายให้เข้าใจ" };
+
+async function api(path, data = {}){
+  const p = S.prefs || DEFAULT_PREFS;
+  switch (path){
+    case "/login": {
+      const saved = await dget(P("prefs"), {});
+      return { prefs: { ...DEFAULT_PREFS, ...saved, styles: { ...DEFAULT_PREFS.styles, ...(saved.styles || {}) } } };
+    }
+    case "/prefs/save": await dset(P("prefs"), data.prefs); return { prefs: data.prefs };
+    case "/news": {
+      const text = String(data.text || "").trim();
+      if (!text) throw new Error(L().pasteNewsPh);
+      const topics = (data.topics || []).slice(0, 12);
+      const total = [10,20,30].includes(Number(p.newsCount)) ? Number(p.newsCount) : 20;
+      const prompt = `คุณคือบรรณาธิการข่าวที่เป็นกลาง ผู้ใช้วางข้อความด้านล่าง ซึ่งอาจมีข่าวหลายชิ้น หัวข่าว ลิงก์ หรือโพสต์ปนกัน
+งานของคุณ: แยกเป็นข่าวทีละเรื่อง (สูงสุด ${total} เรื่อง) รวมข่าวซ้ำเรื่องเดียวกันเป็นเรื่องเดียว แล้วสรุปแต่ละเรื่อง
+ใช้เฉพาะข้อมูลในข้อความที่วาง ห้ามแต่งข้อเท็จจริง ตัวเลข ชื่อ หรือวันที่ที่ไม่มีในข้อความ
+หัวข้อที่ผู้ใช้สนใจ: ${topics.join(", ") || "-"} — ใส่ topic เป็นหนึ่งในหัวข้อนี้ ถ้าไม่เข้ากับหัวข้อไหนให้ใส่ "อื่นๆ"
+${langLine(p)}
+ตอบเป็น JSON เท่านั้น:
+{"overview":"ภาพรวมข่าวทั้งหมด 2-3 ประโยค",
+ "items":[{"topic":"...","headline":"หัวข่าวเรียบเรียงใหม่ เป็นกลาง ไม่เรียกคลิก","points":["..."],"category":"หมวดสั้นๆ","tone":"บวก|กลาง|ลบ","source":"ชื่อสำนักถ้ามีในข้อความ ไม่มีให้เว้นว่าง","link":"URL ถ้ามีในข้อความ ไม่มีให้เว้นว่าง","date":"วันที่ถ้ามีในข้อความ"}]}
+กติกา: ${LENGTH_RULE[data.length] || LENGTH_RULE.mid}${styleLine(p, "news")}
+
+ข้อความที่ผู้ใช้วาง:
+<<<
+${fitBytes(text, 48000)}
+>>>`;
+      const r = await ai(prompt, "default");
+      const items = (Array.isArray(r.items) ? r.items : []).slice(0, total).map((x, i) => ({
+        id: i, topic: clip(x.topic || "อื่นๆ", 40), headline: clip(x.headline, 220),
+        points: (Array.isArray(x.points) ? x.points : []).map(s => clip(s, 400)).slice(0, 6),
+        category: clip(x.category || x.topic, 30), tone: ["บวก","กลาง","ลบ"].includes(x.tone) ? x.tone : "กลาง",
+        source: clip(x.source, 60), link: /^https?:\/\//.test(x.link || "") ? x.link : "", date: clip(x.date, 60), sources: 1,
+      })).filter(x => x.headline);
+      if (!items.length) throw new Error("ไม่พบข่าวในข้อความที่วาง");
+      const out = { overview: clip(r.overview, 800), items, created: new Date().toISOString() };
+      await dset(P("feed"), out);
+      return out;
+    }
+    case "/feed/last": return await dget(P("feed"), null);
+    case "/follow/list": return { follows: await dget(P("follows"), []) };
+    case "/follow/add": {
+      const q = clip(data.q, 60); if (!q) throw new Error("พิมพ์ชื่อเรื่องก่อน");
+      const list = await dget(P("follows"), []);
+      if (!list.some(f => f.q === q)) list.unshift({ q, added: new Date().toISOString() });
+      await dset(P("follows"), list.slice(0, 30));
+      if (data.seed){ const key = P("story_" + h32(q)); const st = await dget(key, { q, texts: [], result: null }); st.texts.push({ text: clip(data.seed, 8000), added: new Date().toISOString() }); await dset(key, st); }
+      return { follows: list.slice(0, 30) };
+    }
+    case "/follow/remove": {
+      const list = (await dget(P("follows"), [])).filter(f => f.q !== data.q);
+      await dset(P("follows"), list); await ddel(P("story_" + h32(data.q)));
+      return { follows: list };
+    }
+    case "/story": {
+      const key = P("story_" + h32(data.q));
+      const st = await dget(key, { q: data.q, texts: [], result: null });
+      if (data.add){ st.texts.push({ text: clip(data.add, 8000), added: new Date().toISOString() }); st.texts = st.texts.slice(-15); }
+      if (!st.texts.length) return { empty: true };
+      if (st.result && !data.add && !data.refresh) return st.result;
+      const prompt = `คุณคือนักข่าวที่เป็นกลาง ด้านล่างคือข่าวทั้งหมดที่ผู้ใช้รวบรวมไว้ของเรื่อง "${data.q}" (เรียงตามลำดับที่เพิ่ม)
+รวมเป็นเรื่องเดียว ใช้เฉพาะข้อมูลที่ให้มา ถ้าไม่มีข้อมูลส่วนใดให้ใส่ "ยังไม่มีข้อมูล" ห้ามเดา
+ถ้าแต่ละแหล่งรายงานตัวเลขหรือข้อเท็จจริงไม่ตรงกัน ให้ใส่ใน conflicts ${langLine(p)}
+ตอบเป็น JSON เท่านั้น:
+{"title":"ชื่อเรื่อง","status":"กำลังพัฒนา|คลี่คลาย|จบแล้ว",
+ "w":{"who":"","what":"","where":"","when":"","why":"","how":""},
+ "story":"เล่าเรื่อง 2-3 ย่อหน้า ภาษาง่าย","analogy":"ตัวอย่างเปรียบเทียบให้เข้าใจง่าย",
+ "timeline":[{"when":"วันที่/เวลา","what":"เกิดอะไรขึ้น","sources":["ชื่อสำนักถ้ามี"]}],
+ "sides":[{"name":"ฝ่าย","stance":"จุดยืน"}],"conflicts":["..."],"watch":["สิ่งที่ต้องจับตาต่อ"],
+ "sources":[{"title":"หัวข่าวของแต่ละชิ้น","source":"สำนักถ้ามี","link":"URL ถ้ามีในข้อความ","date":"วันที่ถ้ามี"}]}
+timeline เรียงจากเก่าไปใหม่${styleLine(p, "story")}
+
+ข่าว:
+${st.texts.map((x, i) => `--- ชิ้นที่ ${i + 1} (เพิ่มเมื่อ ${x.added}) ---\n${x.text}`).join("\n\n")}`;
+      const r = await ai(prompt, "default");
+      const arr = (v, n, f) => (Array.isArray(v) ? v : []).slice(0, n).map(f);
+      st.result = {
+        q: data.q, title: clip(r.title || data.q, 120), status: clip(r.status, 20) || "กำลังพัฒนา",
+        w: Object.fromEntries(["who","what","where","when","why","how"].map(k => [k, clip(r.w && r.w[k], 300)])),
+        story: clip(r.story, 3000), analogy: clip(r.analogy, 600),
+        timeline: arr(r.timeline, 15, t => ({ when: clip(t.when, 60), what: clip(t.what, 300), sources: arr(t.sources, 4, s => clip(s, 60)).filter(Boolean) })),
+        sides: arr(r.sides, 5, s => ({ name: clip(s.name, 60), stance: clip(s.stance, 400) })),
+        conflicts: arr(r.conflicts, 5, c => clip(c, 300)), watch: arr(r.watch, 5, c => clip(c, 300)),
+        sources: arr(r.sources, 20, s => ({ title: clip(s.title, 200), source: clip(s.source, 60), link: /^https?:\/\//.test(s.link || "") ? s.link : "", date: clip(s.date, 60) })),
+        created: new Date().toISOString(), count: st.texts.length,
+      };
+      await dset(key, st);
+      return st.result;
+    }
+    case "/story/ask": {
+      const st = await dget(P("story_" + h32(data.q)), null);
+      if (!st || !st.result) throw new Error("ยังไม่มีสรุปของเรื่องนี้");
+      const s = st.result;
+      const r = await ai(`ตอบคำถามของผู้ใช้เกี่ยวกับเรื่อง "${s.title}" โดยใช้เฉพาะข้อมูลด้านล่าง ถ้าข้อมูลไม่พอให้บอกตรงๆ ว่ายังไม่มีข้อมูล ${langLine(p)}
+ตอบเป็น JSON: {"answer":"..."}
+คำถาม: ${clip(data.question, 300)}
+
+สรุปเรื่อง: ${s.story}
+ไทม์ไลน์: ${s.timeline.map(t => `${t.when}: ${t.what}`).join(" / ")}
+ข่าวต้นทาง:
+${st.texts.map(x => x.text).join("\n---\n")}`, "quick");
+      return { answer: clip(r.answer, 2000) };
+    }
+    case "/video": {
+      const text = String(data.text || "").trim();
+      if (text.length < 40) throw new Error(L().transcriptPh);
+      const mode = data.mode === "full" ? "full" : "sum";
+      const prompt = mode === "sum"
+        ? `ด้านล่างคือคำบรรยาย/transcript ของคลิปวิดีโอ${data.title ? ` (ชื่อหรือลิงก์: ${clip(data.title, 200)})` : ""} สรุปอย่างเป็นกลาง ใช้เฉพาะข้อมูลในข้อความ ${langLine(p)}
+ตอบเป็น JSON เท่านั้น:
+{"headline":"ชื่อเรื่อง 1 บรรทัด","channel":"ชื่อช่อง/รายการ ถ้ามีในข้อความ","summary":["ประเด็นสำคัญ 3-6 ข้อ"],
+ "key_moments":[{"time":"mm:ss ถ้ามีเวลาในข้อความ ไม่มีให้เว้นว่าง","point":"..."}],"category":"หมวด","sentiment":"บวก|กลาง|ลบ"}${styleLine(p, "video")}
+
+คำบรรยาย:
+<<<
+${fitBytes(text, 50000)}
+>>>`
+        : `ด้านล่างคือคำบรรยาย/transcript ของคลิปวิดีโอ จัดเป็นช่วงตามหัวข้อที่เปลี่ยน แก้คำผิดและเว้นวรรคให้อ่านง่าย คงเนื้อหาเดิมไว้ทั้งหมด ห้ามสรุปย่อหรือแต่งเพิ่ม
+ระบุผู้พูดถ้าเดาได้จากบริบท ไม่แน่ใจให้ใช้ "ผู้พูด"
+ตอบเป็น JSON เท่านั้น:
+{"headline":"ชื่อเรื่อง","channel":"","speakers":["..."],
+ "sections":[{"start":"mm:ss ถ้ามี","end":"","title":"หัวข้อช่วง","lines":[{"speaker":"...","text":"..."}]}]}
+
+คำบรรยาย:
+<<<
+${fitBytes(text, 30000)}
+>>>`;
+      const r = await ai(prompt, mode === "full" ? "complex" : "default");
+      const link = /^https?:\/\//.test(data.title || "") ? data.title : "";
+      const item = { id: h32(text.slice(0, 2000) + mode), mode, url: link, headline: clip(r.headline, 220), channel: clip(r.channel, 100), created: new Date().toISOString() };
+      if (mode === "sum"){
+        item.summary = (r.summary || []).map(s => clip(s, 500)).slice(0, 8);
+        item.key_moments = (r.key_moments || []).slice(0, 12).map(k => ({ time: clip(k.time, 10), point: clip(k.point, 300) }));
+        item.category = clip(r.category, 30); item.sentiment = clip(r.sentiment, 10);
+      } else {
+        item.sections = (r.sections || []).slice(0, 60).map(s => ({ start: clip(s.start, 10), end: clip(s.end, 10), title: clip(s.title, 200),
+          lines: (s.lines || []).slice(0, 150).map(l => ({ speaker: clip(l.speaker, 60), text: clip(l.text, 2000) })) }));
+      }
+      const hist = (await dget(P("vh"), [])).filter(x => x.id !== item.id);
+      hist.unshift(item);
+      await dset(P("vh"), JSON.parse(JSON.stringify(hist.slice(0, 8))));
+      return item;
+    }
+    case "/video/history": return { history: await dget(P("vh"), []) };
+    case "/saved/list": return { saved: await dget(P("saved"), []) };
+    case "/saved/toggle": {
+      const list = await dget(P("saved"), []), it = data.item;
+      const key = it.link || it.headline;
+      const i = list.findIndex(x => (x.link || x.headline) === key);
+      if (i >= 0) list.splice(i, 1); else list.unshift({ headline: it.headline, link: it.link, source: it.source, points: it.points, saved: new Date().toISOString() });
+      await dset(P("saved"), list.slice(0, 200));
+      return { saved: list.slice(0, 200) };
+    }
+  }
+  throw new Error("unknown " + path);
+}
+async function savePrefs(patch){
+  Object.assign(S.prefs, patch); applyPrefs(); render();
+  try { const d = await api("/prefs/save", { prefs: S.prefs }); if (d.prefs) { S.prefs = d.prefs; applyPrefs(); } } catch(e){ toast(e.message); }
+}
+function applyPrefs(){
+  const p = S.prefs || {}, root = document.documentElement;
+  const dark = p.theme === "dark" || (p.theme === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
+  if (p.theme === "auto") delete root.dataset.gn; else root.dataset.gn = dark ? "dark" : "light";
+  root.lang = p.uiLang === "en" ? "en" : "th";
+  root.style.setProperty("--fs", ({s:"15px",m:"16px",l:"18px"})[p.fontSize] || "16px");
+}
+
+/* =================== หน้าจอ =================== */
+function render(){
+  const top = $("topbar"), tabs = $("tabs"), view = $("view");
+  $("askBar").innerHTML = "";
+  if (!S.ready){ top.hidden = false; tabs.hidden = true; view.innerHTML = S.err ? errBox() + `<button class="btn ghost" id="bootRetry">${esc(L().retry)}</button>` : loading(""); return; }
+  top.hidden = false; tabs.hidden = false;
+  tabs.innerHTML = [["news","tabNews"],["follow","tabFollow"],["video","tabVideo"]].map(([k,l]) =>
+    `<button class="${S.tab===k?"on":""}" data-tab="${k}" aria-current="${S.tab===k}">${svg(k==="news"?"news":k,22)}${L()[l]}</button>`).join("");
+  if (S.tab === "news") view.innerHTML = S.screen === "feed" ? feedView() : homeView();
+  else if (S.tab === "follow") view.innerHTML = S.storyQ ? storyView() : followView();
+  else view.innerHTML = videoView();
+  if (S.tab === "follow" && S.storyQ && S.story) $("askBar").innerHTML =
+    `<form class="ask" id="askForm"><label class="sr" for="askIn">${esc(L().askAI)}</label><input id="askIn" class="field" placeholder="${esc(L().askAI)}" autocomplete="off"><button class="sq" aria-label="send">${svg("send",18,2.2)}</button></form>`;
+  view.classList.remove("home");
+}
+
+function loading(text){ return `<div class="loading"><div class="spin"></div><div style="white-space:pre-line">${esc(text)}</div></div>`; }
+function errBox(){ return S.err ? `<div class="err">${esc(S.err)}</div>` : ""; }
+
+async function doLogin(){
+  const d = await api("/login");
+  S.prefs = d.prefs; S.ready = true; applyPrefs();
+  api("/follow/list").then(x => { S.follows = x.follows; }).catch(()=>{});
+  api("/saved/list").then(x => { S.saved = x.saved; }).catch(()=>{});
+  api("/feed/last").then(x => { if (x && x.items){ S.lastFeed = x; render(); } }).catch(()=>{});
+}
+
+/* ---- ข่าววันนี้: หน้าเลือก ---- */
+function homeView(){
+  const t = L(), p = S.prefs, h = new Date().getHours();
+  const hello = t.hello[h < 12 ? 0 : h < 17 ? 1 : h < 22 ? 2 : 3];
+  const all = [...BASE_TOPICS, ...p.customTopics];
+  const chips = all.map(x => {
+    const on = p.topics.includes(x), custom = p.customTopics.includes(x);
+    return `<button class="chip ${on?"on":""}" data-topic="${esc(x)}" aria-pressed="${on}">${esc(x)}${custom?` <span class="x" data-del="${esc(x)}" aria-label="ลบ">×</span>`:""}</button>`;
+  }).join("");
+  const seg = (key, opts) => `<div class="seg" style="grid-template-columns:repeat(${opts.length},minmax(0,1fr))">${opts.map(([v,l]) =>
+    `<button class="${p[key]===v?"on":""}" data-pref="${key}" data-val="${v}">${esc(t[l])}</button>`).join("")}</div>`;
+
+  return `
+  <div><div class="muted" style="font-size:14px">${esc(hello)}${p.name?" "+esc(p.name):""}</div><h1>${esc(t.ask)}</h1></div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div class="between"><span class="label">${esc(t.topics)}</span>${S.lastFeed?`<button class="chip" style="height:32px;border:none;color:var(--accent);padding:0" id="sameBtn">${esc(t.lastFeed)}</button>`:""}</div>
+    <div class="chips">${chips}<button class="chip dash" id="addTopic">${esc(t.add)}</button></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px"><span class="label">${esc(t.len)}</span>${seg("length",[["short","short"],["mid","mid"],["long","long"]])}</div>
+  <div style="display:flex;flex-direction:column;gap:6px"><label class="label" for="newsText">${esc(t.pasteNews)}</label>
+    <textarea id="newsText" class="field paste" placeholder="${esc(t.pasteNewsPh)}">${esc(S.newsText||"")}</textarea>
+    <span class="hint">${esc(t.pasteHint)}</span></div>
+  <button class="btn" id="goBtn" ${p.topics.length?"":"disabled"}>${esc(t.go(p.topics.length))}</button>`;
+}
+function recBox(){
+  const t = L();
+  let inner;
+  if (!S.rec) inner = loading("");
+  else if (S.rec.error) inner = `<div class="err">${esc(S.rec.error)}</div>`;
+  else inner = S.rec.picks.map(p => `<a href="${safeUrl(p.link)}" target="_blank" rel="noopener" style="display:flex;flex-direction:column;gap:2px;color:var(--ink)">
+      <span style="font-size:14px;font-weight:600;line-height:1.45">${esc(p.headline)}</span>
+      <span style="font-size:12px;color:var(--muted)">${p.outside?`<span class="tag hot" style="font-size:11px">${esc(t.outside)}</span> `:""}${esc(t.why)}: ${esc(p.why)} · ${esc(p.source)}</span></a>`).join("");
+  return `<div class="card" style="background:var(--soft);max-height:46vh;overflow-y:auto">
+    <div class="between"><b style="font-size:14px">${esc(t.recT)}</b><button class="icon-btn" style="width:32px;height:32px" id="recClose" aria-label="close">${svg("close",16)}</button></div>
+    ${inner}</div>`;
+}
+
+/* ---- ข่าววันนี้: หน้าเสิร์ฟ ---- */
+function feedView(){
+  const t = L(), f = S.feed;
+  const head = `<div class="row" style="margin:-6px 0 -4px -8px">
+    <button class="icon-btn" id="backHome" aria-label="back">${svg("back",22)}</button>
+    <div style="flex:1;display:flex;flex-direction:column"><b style="font-size:17px">${esc(t.yourNews)}</b>
+    <span class="muted" style="font-size:12px">${f&&f.items?`${f.items.length} · ${esc(t.aiBy)}`:""}</span></div></div>`;
+  if (S.busy || !f) return head + loading(t.loadingNews);
+  if (f.error) return head + `<div class="err">${esc(f.error)}</div><button class="btn ghost" id="feedRetry">${esc(t.retry)}</button>`;
+  const cats = [...new Set(f.items.map(i => i.topic))];
+  const shown = f.items.filter(i => S.filter === "all" || i.topic === S.filter);
+  const savedSet = new Set(S.saved.map(s => s.link));
+  return head + `
+  <div class="chips scroll">
+    <button class="chip ${S.filter==="all"?"on":""}" data-filter="all">${esc(t.all)} ${f.items.length}</button>
+    ${cats.map(c => `<button class="chip ${S.filter===c?"on":""}" data-filter="${esc(c)}">${esc(c)}</button>`).join("")}
+  </div>
+  ${f.overview?`<section class="hero"><small>${esc(t.overview)}</small><p>${esc(f.overview)}</p></section>`:""}
+  ${shown.map(n => `<article class="card">
+    <div class="row" style="font-size:12px;gap:6px;flex-wrap:wrap"><span class="tag a">${esc(n.category)}</span><span class="tag">${esc(n.tone)}</span>${n.source||n.date?`<span style="color:var(--faint)">· ${esc(n.source)}${n.date?" · "+esc(n.date):""}</span>`:""}</div>
+    <h3>${esc(n.headline)}</h3>
+    ${n.points.length?`<ul>${n.points.map(p=>`<li>${esc(p)}</li>`).join("")}</ul>`:""}
+    <div class="foot"><span class="muted" style="font-size:12px">${esc(n.topic)}</span>
+      <div class="acts">
+        <button data-follow="${n.id}" aria-label="${esc(t.tabFollow)}">${svg("plus",19)}</button>
+        <button data-save="${n.id}" class="${savedSet.has(n.link)?"on":""}" aria-label="${esc(t.saved)}">${svg("bookmark",19)}</button>
+        ${n.link?`<a href="${safeUrl(n.link)}" target="_blank" rel="noopener" aria-label="open">${svg("share",19)}</a>`:""}
+      </div></div>
+  </article>`).join("")}
+  <div class="end">${esc(t.done)}</div>`;
+}
+
+/* ---- ติดตาม ---- */
+function followView(){
+  const t = L();
+  return `<h1 style="font-size:22px">${esc(t.follows)}</h1>
+  <button class="chip dash" id="addFollow" style="align-self:flex-start">${esc(t.addFollow)}</button>
+  ${S.follows.length ? S.follows.map(f => `<button class="listrow" data-story="${esc(f.q)}"><span style="font-weight:600">${esc(f.q)}</span><span class="muted">›</span></button>`).join("")
+   : `<div class="loading" style="white-space:pre-line">${esc(t.noFollow)}</div>`}`;
+}
+function storyView(){
+  const t = L(), s = S.story;
+  const head = `<div class="row" style="margin:-6px 0 -4px -8px">
+    <button class="icon-btn" id="backFollow" aria-label="back">${svg("back",22)}</button>
+    <b style="flex:1;font-size:17px">${esc(S.storyQ)}</b>
+    ${s&&!s.error&&!s.empty?`<button class="icon-btn" id="storyRefresh" aria-label="${esc(t.rebuild)}">${svg("refresh",20)}</button>`:""}</div>`;
+  if (!s) return head + loading(t.loadingStory);
+  const addBox = `<section style="display:flex;flex-direction:column;gap:8px"><label class="label" for="storyText">${esc(t.addToStory)}</label>
+    <textarea id="storyText" class="field paste" placeholder="${esc(t.addToStoryPh)}"></textarea>
+    <button class="btn small" id="storyAdd">${esc(t.addToStory)}</button></section>`;
+  if (s.error) return head + `<div class="err">${esc(s.error)}</div><button class="btn" id="storyRetry">${esc(t.retry)}</button>${addBox}<button class="btn ghost" id="unfollowBtn">${esc(t.unfollow)}</button>`;
+  if (s.empty) return head + `<div class="loading" style="white-space:pre-line;padding:20px 0">${esc(t.storyEmpty)}</div>${addBox}<button class="btn ghost small" id="unfollowBtn">${esc(t.unfollow)}</button>`;
+  const W = t.W;
+  return head + `
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <div class="row" style="font-size:12px;gap:6px"><span class="tag ${/จบ|คลี่/.test(s.status)?"":"hot"}">${esc(s.status)}</span><span style="color:var(--faint)">${esc(ago(s.created))} · ${s.count||0} ชิ้น</span></div>
+    <h1 style="font-size:22px">${esc(s.title)}</h1>
+  </div>
+  <section class="grid2">${Object.keys(W).map(k => `<div class="w"><b>${esc(W[k])}</b><span>${esc(s.w[k]||"-")}</span></div>`).join("")}</section>
+  <section style="display:flex;flex-direction:column;gap:8px"><h2>${esc(t.story)}</h2><p class="txt">${esc(s.story)}</p>
+    ${s.analogy?`<div class="box soft"><b>${esc(t.analogy)}:</b> ${esc(s.analogy)}</div>`:""}</section>
+  ${s.timeline.length?`<section style="display:flex;flex-direction:column;gap:10px"><h2>${esc(t.timeline)}</h2><div>
+    ${s.timeline.map(e => `<div class="tl"><div class="rail"><span class="dot"></span><span class="ln"></span></div><div class="body">
+      <span class="when">${esc(e.when)}</span><span>${esc(e.what)}</span>${e.sources.length?`<span class="muted" style="font-size:12px">${esc(e.sources.join(", "))}</span>`:""}</div></div>`).join("")}
+  </div></section>`:""}
+  ${s.sides.length?`<section style="display:flex;flex-direction:column;gap:8px"><h2>${esc(t.sides)}</h2>
+    ${s.sides.map(x => `<div class="box" style="border:1px solid var(--line)"><b>${esc(x.name)}</b> ${esc(x.stance)}</div>`).join("")}</section>`:""}
+  ${s.conflicts.length?`<section class="box warn"><b>${esc(t.conflicts)}</b><ul style="margin:6px 0 0;padding-left:18px">${s.conflicts.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></section>`:""}
+  ${s.watch.length?`<section style="display:flex;flex-direction:column;gap:6px"><h2>${esc(t.watch)}</h2><ul style="margin:0;padding-left:18px;font-size:14px;line-height:1.6">${s.watch.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></section>`:""}
+  <div id="answer"></div>
+  <section style="display:flex;flex-direction:column;gap:4px"><h2>${esc(t.sources)} (${s.sources.length})</h2>
+    ${s.sources.map(x => x.link ? `<a class="listrow" href="${safeUrl(x.link)}" target="_blank" rel="noopener" style="color:var(--ink)"><span>${esc(x.title)}<br><span class="muted" style="font-size:12px">${esc(x.source)} ${esc(x.date)}</span></span><span class="muted">↗</span></a>` : `<div class="listrow"><span>${esc(x.title)}<br><span class="muted" style="font-size:12px">${esc(x.source)} ${esc(x.date)}</span></span></div>`).join("")}</section>
+  ${addBox}
+  <p class="muted" style="font-size:12px;margin:0">${esc(t.aiNote)}</p>
+  <button class="btn ghost small" id="unfollowBtn">${esc(t.unfollow)}</button>`;
+}
+
+/* ---- สรุปวิดีโอ ---- */
+function videoView(){
+  const t = L(), v = S.vResult;
+  let res = "";
+  if (S.busy) res = loading(t.loadingVideo);
+  else if (S.err) res = errBox() + `<button class="btn ghost small" id="vGo2">${esc(t.retry)}</button>`;
+  else if (v) {
+    const thumb = "";
+    const body = v.mode === "full"
+      ? (v.sections||[]).map(s => `<div class="sec"><b style="font-size:13px;color:var(--accent)">${s.start?`[${esc(s.start)}${s.end?" – "+esc(s.end):""}] `:""}${esc(s.title)}</b>
+          ${s.lines.map(l => `<p><b>${esc(l.speaker)}:</b> ${esc(l.text)}</p>`).join("")}</div>`).join("")
+      : `${(v.summary||[]).length?`<ul>${v.summary.map(p=>`<li>${esc(p)}</li>`).join("")}</ul>`:""}
+         ${(v.key_moments||[]).length?`<b style="font-size:13px">${esc(t.moments)}</b><div style="display:flex;flex-direction:column;gap:6px">${v.key_moments.map(k =>
+          `<div class="mom">${k.time?`<b>${esc(k.time)}</b>`:""}<span>${esc(k.point)}</span></div>`).join("")}</div>`:""}`;
+    res = `<article class="card" style="gap:10px">${thumb}
+      <div><span class="muted" style="font-size:12px">${v.url?`<a href="${safeUrl(v.url)}" target="_blank" rel="noopener">${esc(v.channel||"YouTube")} ↗</a>`:esc(v.channel||"")}${v.category?" · "+esc(v.category):""}</span><h3>${esc(v.headline)}</h3></div>
+      ${body}
+      <div class="row"><button class="btn ghost small" id="vCopy">${esc(t.copy)}</button></div>
+      <span class="muted" style="font-size:12px">${esc(t.aiNote)}</span></article>`;
+  }
+  return `<h1 style="font-size:22px">${esc(t.video)}</h1>
+  <div style="display:flex;flex-direction:column;gap:6px"><label class="label" for="vTitle">${esc(t.clipTitle)}</label>
+    <input id="vTitle" class="field" placeholder="https://youtu.be/…" autocomplete="off" value="${esc(S.vTitle||"")}"></div>
+  <div style="display:flex;flex-direction:column;gap:6px"><label class="label" for="yt">${esc(t.transcript)}</label>
+    <textarea id="yt" class="field paste" placeholder="${esc(t.transcriptPh)}">${esc(S.vUrl||"")}</textarea></div>
+  <div class="seg" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+    <button class="${S.vMode==="sum"?"on":""}" data-vmode="sum">${esc(t.modeSum)}</button>
+    <button class="${S.vMode==="full"?"on":""}" data-vmode="full">${esc(t.modeFull)}</button></div>
+  <button class="btn" id="vGo" ${S.busy?"disabled":""}>${esc(S.vMode==="sum"?t.goSum:t.goFull)}</button>
+  ${res}
+  ${S.vHistory.length?`<section><span class="label">${esc(t.history)}</span>${S.vHistory.slice(0,15).map(h =>
+    `<button class="listrow" data-vh="${esc(h.id)}"><span>${esc(h.headline||h.id)}<br><span class="muted" style="font-size:12px">${esc(h.mode==="full"?t.modeFull:t.modeSum)} · ${esc(ago(h.created))}</span></span><span class="muted">›</span></button>`).join("")}</section>`:""}`;
+}
+
+/* =================== การกระทำ =================== */
+async function loadFeed(refresh){
+  const p = S.prefs;
+  S.screen = "feed"; S.feed = null; S.filter = "all"; S.busy = true; render();
+  try { S.feed = await api("/news", { topics: p.topics, length: p.length, text: S.newsText }); S.lastFeed = S.feed; }
+  catch(e){ S.feed = { error: e.message }; }
+  S.busy = false; render(); $("view").scrollTop = 0;
+}
+async function openStory(q, refresh, add){
+  S.storyQ = q; S.story = null; render(); $("view").scrollTop = 0;
+  try { S.story = await api("/story", { q, refresh: !!refresh, add }); } catch(e){ S.story = { error: e.message }; }
+  if (S.storyQ === q) render();
+}
+async function runVideo(url, mode){
+  S.vUrl = url; S.vTitle = ($("vTitle")||{}).value || S.vTitle || ""; S.vMode = mode; S.busy = true; S.err = null; S.vResult = null; render();
+  try { S.vResult = await api("/video", { text: url, title: S.vTitle, mode }); api("/video/history").then(d => { S.vHistory = d.history; render(); }); }
+  catch(e){ S.err = e.message; }
+  S.busy = false; render();
+}
+
+document.addEventListener("click", async e => {
+  const el = e.target.closest("button,a"); if (!el) return;
+  const d = el.dataset;
+  if (d.tab){ S.tab = d.tab; S.err = null; if (d.tab==="video" && !S.vHistory.length) api("/video/history").then(x=>{S.vHistory=x.history;render();}).catch(()=>{}); render(); $("view").scrollTop=0; return; }
+  if (e.target.dataset.del){ e.stopPropagation(); const x = e.target.dataset.del;
+    savePrefs({ customTopics: S.prefs.customTopics.filter(c=>c!==x), topics: S.prefs.topics.filter(c=>c!==x) }); return; }
+  if (d.topic){ const x = d.topic, on = S.prefs.topics.includes(x);
+    savePrefs({ topics: on ? S.prefs.topics.filter(c=>c!==x) : [...S.prefs.topics, x] }); return; }
+  if (d.pref){ savePrefs({ [d.pref]: d.val }); return; }
+  if (d.filter){ S.filter = d.filter; render(); return; }
+  if (d.vmode){ S.vMode = d.vmode; S.vUrl = ($("yt")||{}).value || S.vUrl; S.vTitle = ($("vTitle")||{}).value || S.vTitle; render(); return; }
+  if (d.story){ openStory(d.story); return; }
+  if (d.vh){ const it = S.vHistory.find(x => x.id === d.vh); if (it){ S.vResult = it; S.err = null; render(); $("view").scrollTop = 0; } return; }
+  if (d.save){ const n = S.feed.items[Number(d.save)];
+    try { S.saved = (await api("/saved/toggle", { item: n })).saved; render(); toast(L().saved1); } catch(err){ toast(err.message); } return; }
+  if (d.follow){ const n = S.feed.items[Number(d.follow)]; promptFollow(n.headline.slice(0,40), [n.headline, ...n.points, n.source, n.link, n.date].filter(Boolean).join("\n")); return; }
+  if (d.menu){ closeDrawer(); openSheet(d.menu); return; }
+  if (d.theme){ savePrefs({ theme: d.theme }); return; }
+  if (d.uil){ savePrefs({ uiLang: d.uil }); return; }
+  if (d.suml){ savePrefs({ sumLang: d.suml }); return; }
+  if (d.fs){ savePrefs({ fontSize: d.fs }); return; }
+  if (d.nc){ savePrefs({ newsCount: Number(d.nc) }); return; }
+  if (d.preset){ const ta = $("promptTa"); if (ta) ta.value = d.preset; return; }
+  if (d.ptab){ S.ptab = d.ptab; openSheet("prompt"); return; }
+
+  switch (el.id){
+    case "brand": S.tab = "news"; S.screen = "home"; render(); break;
+    case "menuBtn": openDrawer(); break;
+    case "goBtn": case "feedRetry": { const ta = $("newsText"); if (ta) S.newsText = ta.value; if (!String(S.newsText||"").trim()){ toast(L().pasteNewsPh); break; } loadFeed(false); break; }
+    case "sameBtn": S.feed = S.lastFeed; S.filter = "all"; S.screen = "feed"; render(); break;
+    case "backHome": S.screen = "home"; render(); break;
+    case "recBtn": S.recOpen = true; render();
+      if (!S.rec || S.rec.error){ S.rec = null; render(); try { S.rec = await api("/recommend"); } catch(err){ S.rec = { error: err.message }; } render(); } break;
+    case "recClose": S.recOpen = false; render(); break;
+    case "addTopic": askText(L().newTopic, v => { if (!S.prefs.customTopics.includes(v)) savePrefs({ customTopics: [...S.prefs.customTopics, v], topics: [...S.prefs.topics, v] }); }); break;
+    case "addFollow": promptFollow(""); break;
+    case "backFollow": S.storyQ = null; S.story = null; render(); break;
+    case "storyRefresh": openStory(S.storyQ, true); break;
+    case "storyRetry": openStory(S.storyQ); break;
+    case "storyAdd": { const v = ($("storyText")||{}).value || ""; if (v.trim()) openStory(S.storyQ, false, v.trim()); break; }
+    case "unfollowBtn": try { S.follows = (await api("/follow/remove", { q: S.storyQ })).follows; } catch(err){ toast(err.message); }
+      S.storyQ = null; S.story = null; render(); break;
+    case "vGo": case "vGo2": { const u = $("yt").value.trim(); if (u) runVideo(u, S.vMode); break; }
+    case "vCopy": { const v = S.vResult; const txt = v.mode === "full"
+        ? v.sections.map(s => `[${s.start}] ${s.title}\n` + s.lines.map(l => `${l.speaker}: ${l.text}`).join("\n")).join("\n\n")
+        : `${v.headline}\n\n` + (v.summary||[]).map(s=>"• "+s).join("\n") + "\n\n" + (v.key_moments||[]).map(k=>`${k.time} ${k.point}`).join("\n");
+      try { await navigator.clipboard.writeText(txt); toast(L().copied); } catch(err){ toast("copy failed"); } break; }
+    case "switchUser": S.user = S.user === "jo" ? "u2" : "jo"; lsSet("gn_user", S.user); closeDrawer();
+      Object.assign(S, { ready: false, feed: null, lastFeed: null, newsText: "", rec: null, recOpen: false, vResult: null, vHistory: [], follows: [], saved: [], storyQ: null, story: null, screen: "home", tab: "news", err: null });
+      boot(); break;
+    case "bootRetry": boot(); break;
+  }
+});
+document.addEventListener("input", e => {
+  if (e.target.id === "newsText") S.newsText = e.target.value;
+  if (e.target.id === "yt") S.vUrl = e.target.value;
+  if (e.target.id === "vTitle") S.vTitle = e.target.value;
+});
+document.addEventListener("submit", async e => {
+  if (e.target.id !== "askForm") return;
+  e.preventDefault();
+  const inp = $("askIn"), q = inp.value.trim(); if (!q) return;
+  inp.value = ""; const box = $("answer");
+  box.innerHTML = `<div class="box soft"><b>${esc(q)}</b>${loading("")}</div>`;
+  box.scrollIntoView({ behavior: "smooth", block: "center" });
+  try { const a = await api("/story/ask", { q: S.storyQ, question: q });
+    box.innerHTML = `<div class="box soft"><b>${esc(q)}</b><p class="txt" style="margin-top:6px">${esc(a.answer)}</p></div>`; }
+  catch(err){ box.innerHTML = `<div class="err">${esc(err.message)}</div>`; }
+});
+
+function promptFollow(def, seed){
+  askText(L().newFollow, async v => {
+    try { S.follows = (await api("/follow/add", { q: v, seed })).follows; toast(L().followed); S.tab = "follow"; openStory(v); }
+    catch(err){ toast(err.message); }
+  }, def);
+}
+
+/* =================== เมนู + แผ่นตั้งค่า =================== */
+function openDrawer(){
+  const t = L(), p = S.prefs;
+  const item = (k, ic, title, sub) => `<button class="mi" data-menu="${k}"><span class="ic">${svg(ic,18)}</span><span class="t"><span>${esc(title)}</span><span>${esc(sub)}</span></span></button>`;
+  $("drawer").innerHTML = `
+    <div class="hd"><b style="font-size:17px">${esc(t.menu)}</b><button class="icon-btn" id="drawerClose" aria-label="close">${svg("close",22)}</button></div>
+    <div class="row" style="padding:18px 20px;border-bottom:1px solid var(--line2);gap:12px">
+      <span class="avatar">${esc((p.name||"?").slice(0,1).toUpperCase())}</span>
+      <div style="display:flex;flex-direction:column;flex:1"><b>${esc(p.name||"—")}</b><span class="muted" style="font-size:12px">${S.user==="jo"?t.p1:t.p2}</span></div>
+      <button class="chip" id="switchUser" style="height:34px">${esc(t.switchTo)} ${S.user==="jo"?"2":"1"}</button></div>
+    <nav style="display:flex;flex-direction:column;padding:8px">
+      ${item("profile","user",t.profile,t.profileS)}
+      ${item("prompt","prompt",t.prompt,t.promptS)}
+      ${item("theme","sun",t.theme,t[p.theme])}
+      ${item("lang","globe",t.lang,`${p.uiLang==="en"?"English":"ไทย"} · ${p.sumLang==="en"?"English":"ไทย"}`)}
+      ${item("saved","bookmark",t.saved,String(S.saved.length))}
+      ${item("settings","gear",t.settings,t.settingsS)}
+    </nav>`;
+  $("drawerWrap").classList.add("open");
+  $("drawerClose").onclick = closeDrawer;
+}
+function closeDrawer(){ $("drawerWrap").classList.remove("open"); }
+$("drawerWrap").addEventListener("click", e => { if (e.target.id === "drawerWrap") closeDrawer(); });
+
+function sheetShell(title, body){
+  $("sheet").innerHTML = `<div class="hd"><b>${esc(title)}</b><button class="icon-btn" id="sheetClose" aria-label="close">${svg("close",22)}</button></div><div class="bd">${body}</div>`;
+  $("sheetWrap").classList.add("open");
+  $("sheetClose").onclick = closeSheet;
+}
+function closeSheet(){ $("sheetWrap").classList.remove("open"); render(); }
+$("sheetWrap").addEventListener("click", e => { if (e.target.id === "sheetWrap") closeSheet(); });
+
+function segRow(attr, cur, opts){
+  return `<div class="seg" style="grid-template-columns:repeat(${opts.length},minmax(0,1fr))">${opts.map(([v,l]) =>
+    `<button class="${String(cur)===String(v)?"on":""}" data-${attr}="${v}">${esc(l)}</button>`).join("")}</div>`;
+}
+function openSheet(kind){
+  const t = L(), p = S.prefs;
+  if (kind === "profile"){
+    sheetShell(t.profile, `<label class="label" for="nm">${esc(t.name)}</label><input id="nm" class="field" value="${esc(p.name)}" maxlength="40">
+      <button class="btn" id="saveProfile">${esc(t.save)}</button>`);
+    $("saveProfile").onclick = () => { savePrefs({ name: $("nm").value.trim() }); closeSheet(); toast(t.saved1); };
+  }
+  if (kind === "theme"){
+    sheetShell(t.theme, segRow("theme", p.theme, [["light",t.light],["dark",t.dark],["auto",t.auto]]));
+  }
+  if (kind === "lang"){
+    sheetShell(t.lang, `<span class="label">${esc(t.uiLang)}</span>${segRow("uil", p.uiLang, [["th","ไทย"],["en","English"]])}
+      <span class="label">${esc(t.sumLang)}</span>${segRow("suml", p.sumLang, [["th","ไทย"],["en","English"]])}`);
+  }
+  if (kind === "settings"){
+    sheetShell(t.settings, `<span class="label">${esc(t.font)}</span>${segRow("fs", p.fontSize, [["s","A"],["m","A+"],["l","A++"]])}
+      <span class="label">${esc(t.count)}</span>${segRow("nc", p.newsCount, [[10,"10"],[20,"20"],[30,"30"]])}`);
+  }
+  if (kind === "saved"){
+    sheetShell(t.saved, S.saved.length ? S.saved.map(s => `<a class="listrow" href="${safeUrl(s.link)}" target="_blank" rel="noopener" style="color:var(--ink)"><span>${esc(s.headline)}<br><span class="muted" style="font-size:12px">${esc(s.source)} · ${esc(ago(s.saved))}</span></span><span class="muted">↗</span></a>`).join("")
+      : `<div class="loading">${esc(t.noSaved)}</div>`);
+  }
+  if (kind === "prompt"){
+    const k = S.ptab || "news";
+    const names = { news: t.pNews, story: t.pStory, video: t.pVideo };
+    sheetShell(t.prompt, `<div class="chips scroll">${Object.keys(names).map(x => `<button class="chip ${x===k?"on":""}" data-ptab="${x}">${esc(names[x])}</button>`).join("")}</div>
+      <p class="muted" style="margin:0;line-height:1.6">${esc(t.promptHelp)}</p>
+      <label class="sr" for="promptTa">${esc(names[k])}</label>
+      <textarea id="promptTa" class="field" maxlength="1500">${esc(p.styles[k]||"")}</textarea>
+      <div class="chips">${t.presets.map(x => `<button class="chip" data-preset="${esc(x)}">${esc(x)}</button>`).join("")}</div>
+      <div class="row"><button class="btn ghost small" id="resetPrompt">${esc(t.reset)}</button><button class="btn small" id="savePrompt">${esc(t.save)}</button></div>`);
+    $("savePrompt").onclick = () => { savePrefs({ styles: { ...p.styles, [k]: $("promptTa").value.trim() } }); toast(t.saved1); };
+    $("resetPrompt").onclick = () => { $("promptTa").value = ""; savePrefs({ styles: { ...p.styles, [k]: "" } }); toast(t.saved1); };
+  }
+}
+function askText(label, cb, def){
+  const t = L();
+  sheetShell(label, `<label class="sr" for="askT">${esc(label)}</label><input id="askT" class="field" maxlength="60" value="${esc(def||"")}" placeholder="${esc(label)}">
+    <div class="row"><button class="btn ghost small" id="askNo">${esc(t.cancel)}</button><button class="btn small" id="askOk">${esc(t.ok)}</button></div>`);
+  const inp = $("askT"); setTimeout(() => inp.focus(), 50);
+  const ok = () => { const v = inp.value.trim(); if (!v) return; $("sheetWrap").classList.remove("open"); cb(v); render(); };
+  $("askOk").onclick = ok; $("askNo").onclick = closeSheet;
+  inp.onkeydown = e => { if (e.key === "Enter") ok(); };
+}
+
+/* =================== เริ่มต้น =================== */
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", applyPrefs);
+async function boot(){
+  S.ready = false; S.err = null; render();
+  try { await doLogin(); } catch(e){ S.err = e.message; }
+  render();
+}
+boot();
+</script>
