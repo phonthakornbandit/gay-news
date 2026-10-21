@@ -1,0 +1,11 @@
+name = "gay-news"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+
+# ใส่ ID ของ KV namespace "NEWS" ที่สร้างใน Cloudflare แทน REPLACE_WITH_KV_ID
+[[kv_namespaces]]
+binding = "NEWS"
+id = "REPLACE_WITH_KV_ID"
+
+# Secrets (ตั้งใน Cloudflare เท่านั้น ห้ามใส่ในไฟล์นี้):
+#   GEMINI_API_KEY, PASS_JO, PASS_2
