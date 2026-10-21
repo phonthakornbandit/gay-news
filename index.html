@@ -152,7 +152,7 @@ p.txt{margin:0;font-size:14px;line-height:1.75;color:var(--ink2);white-space:pre
 
 <script>
 /* =================== ตั้งค่า =================== */
-const WORKER_URL = "https://gay-news.YOUR-SUBDOMAIN.workers.dev"; // ← ใส่ที่อยู่ Worker ของคุณ
+const WORKER_URL = "https://gay-news.phonthakornbandit.workers.dev"; // ← ใส่ที่อยู่ Worker ของคุณ
 
 /* =================== ข้อความ 2 ภาษา =================== */
 const T = {
@@ -264,7 +264,7 @@ const svg = (k,s=20,w=2) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24"
 
 /* =================== API =================== */
 async function api(path, data = {}){
-  if (WORKER_URL.includes("YOUR-SUBDOMAIN")) throw new Error(L().setUrl);
+  if (WORKER_URL.includes("YOUR-" + "SUBDOMAIN")) throw new Error(L().setUrl);
   const r = await fetch(WORKER_URL.replace(/\/+$/,"") + path, {
     method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ...data, password: S.pass }),
