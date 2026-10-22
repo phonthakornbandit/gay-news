@@ -75,23 +75,69 @@ async function webSearch(objective, queries){
 }
 function freshEnough(x, period){
   const t = Date.parse(x.date); if (!x.date || !t) return true;
-  const days = { "1d": 2, "3d": 4, "7d": 8 }[period] || 8;
+  const days = { "1d": 1.5, "3d": 3.5, "7d": 7.5 }[period] || 8;
   return Date.now() - t <= days * 86400e3;
+}
+// ---- อ่านฟีดข่าว (Bing News / Google News RSS) ผ่าน Parallel web_fetch ----
+const FEED_PERIOD = { "1d": { bing: "7", g: "1d" }, "3d": { bing: "8", g: "3d" }, "7d": { bing: "8", g: "7d" } };
+function parseFeedMarkdown(md, kind){
+  const out = [];
+  for (const block of String(md || "").split(/\n-{3,}\s*\n/)){
+    const t = block.match(/^##\s+(.+)$/m), m = block.match(/Published:\s*([^\n·]+?)\s*·\s*Link:\s*(\S+)/);
+    if (!t || !m) continue;
+    let title = t[1].trim(), link = m[2].trim(), source = "";
+    if (kind === "bing"){ try { const real = new URL(link).searchParams.get("url"); if (real) link = real; } catch(e){} source = hostOf(link); }
+    else { const k = title.lastIndexOf(" - "); if (k > 0){ source = title.slice(k + 3).trim(); title = title.slice(0, k).trim(); } }
+    if (!/^https?:\/\//.test(link)) continue;
+    const text = block.slice(block.indexOf(m[0]) + m[0].length).replace(/&nbsp;/g, " ").replace(/-{3,}\s*$/, "").replace(/\s+/g, " ").trim();
+    out.push({ title: clip(title, 220), url: link, date: m[1].trim(), source: clip(source, 60), text: clip(text, 600) });
+  }
+  return out;
+}
+async function fetchFeed(url, kind){
+  await mcpP;
+  if (!MCP) throw new Error("หน้านี้ดึงข่าวไม่ได้ในตอนนี้ (ต้องเปิดใน claude.ai และเชื่อม Parallel Search ใน Settings › Connectors)");
+  try {
+    const r = await MCP.callTool(SEARCH_SERVER, "web_fetch", { urls: [url], objective: "รายการหัวข่าวล่าสุด พร้อมลิงก์ วันที่ และชื่อสำนักข่าว", full_content: true, session_id: SID, model_name: "claude-artifact-gay-news" }, { cache: { staleTime: 300000 } });
+    const pl = r && r.payload, res = pl && Array.isArray(pl.results) ? pl.results[0] : null;
+    return parseFeedMarkdown(res && (res.full_content || (res.excerpts || []).join("\n---\n")), kind).slice(0, 25);
+  } catch(e){ return mcpError(e); }
+}
+function mcpError(e){
+  const c = e && e.code;
+  if (c === "server_not_connected" || c === "server_not_found") throw new Error("ยังไม่ได้เชื่อม Parallel Search: ไปที่ claude.ai › Settings › Connectors แล้วเพิ่ม Parallel Search");
+  if (c === "not_in_manifest") throw new Error("ยังไม่ได้อนุญาตให้หน้านี้ใช้ Parallel Search เปิดหน้านี้ใหม่แล้วกดอนุญาต");
+  if (c === "needs_reauth") throw new Error("Parallel Search ต้องเชื่อมใหม่: claude.ai › Settings › Connectors");
+  if (c === "selection_required") throw new Error("มี Parallel Search มากกว่า 1 ตัว ให้เลือกตัวที่จะใช้ในหน้าต่างที่ขึ้นมา");
+  if (c === "tool_error") throw new Error("Parallel Search ตอบกลับผิดพลาด: " + (e.message || ""));
+  throw new Error("ดึงข่าวไม่สำเร็จชั่วคราว ลองใหม่อีกครั้ง");
+}
+async function newsForTerm(t, period){
+  const P2 = FEED_PERIOD[period] || FEED_PERIOD["1d"];
+  const bing = `https://www.bing.com/news/search?q=${encodeURIComponent(t)}&format=rss&setmkt=th-TH&setlang=th-TH&qft=${encodeURIComponent(`interval="${P2.bing}"`)}`;
+  const goog = `https://news.google.com/rss/search?q=${encodeURIComponent(`${t} when:${P2.g}`)}&hl=th&gl=TH&ceid=TH:th`;
+  let items = [];
+  try { items = await fetchFeed(bing, "bing"); } catch(e){ if (/เชื่อม|อนุญาต|ดึงข่าวไม่ได้/.test(e.message)) throw e; }
+  if (items.length < 4){ try { items = items.concat(await fetchFeed(goog, "google")); } catch(e){ if (!items.length) throw e; } }
+  if (!items.length){ // ทางสุดท้าย: ค้นเว็บทั่วไป
+    items = (await webSearch(`ข่าวล่าสุดเกี่ยวกับ "${t}" (วันนี้คือ ${todayTh()})`, [`ข่าว ${t} ล่าสุด`, `${t} ${monthTh()}`])).map(x => ({ ...x, source: hostOf(x.url) }));
+  }
+  return items.map(x => ({ ...x, topic: t }));
 }
 async function searchNews(terms, period){
   let firstErr = null;
-  const lists = await Promise.all(terms.slice(0, 6).map(t =>
-    webSearch(`ข่าวล่าสุดเกี่ยวกับ "${t}" ใน${PERIOD_TH[period] || "สัปดาห์นี้"} (วันนี้คือ ${todayTh()}) จากสำนักข่าวที่น่าเชื่อถือ เน้นข่าวใหม่ ไม่เอาข่าวเก่า`,
-      [`ข่าว ${t} ล่าสุด`, `${t} ${monthTh()}`, `${t} news ${new Date().getFullYear()}`])
-      .then(r => r.map(x => ({ ...x, topic: t })))
-      .catch(e => { firstErr = firstErr || e; return []; })));
+  const lists = await Promise.all(terms.slice(0, 6).map(t => newsForTerm(t, period).catch(e => { firstErr = firstErr || e; return []; })));
   const seen = new Set(), out = [];
-  for (const list of lists) for (const x of list){ if (seen.has(x.url) || !freshEnough(x, period)) continue; seen.add(x.url); out.push(x); }
+  for (const list of lists) for (const x of list){
+    const k = x.title.slice(0, 50);
+    if (seen.has(x.url) || seen.has(k) || !freshEnough(x, period)) continue;
+    seen.add(x.url); seen.add(k); out.push(x);
+  }
   if (!out.length && firstErr) throw firstErr;
   return out;
 }
 function resultsToText(list){
-  return list.map((x, i) => `[${i + 1}] ${x.title}\nหัวข้อที่ค้น: ${x.topic || "-"}\nURL: ${x.url}\nวันที่เผยแพร่: ${x.date || "ไม่ระบุ"}\nเว็บ: ${hostOf(x.url)}\n${x.text}`).join("\n\n");
+  return list.map((x, i) => `[${i + 1}] ${x.title}\nหัวข้อที่ค้น: ${x.topic || "-"}\nURL: ${x.url}\nวันที่เผยแพร่: ${x.date || "ไม่ระบุ"}\nสำนัก: ${x.source || hostOf(x.url)}\n${x.text}`).join("\n\n");
 }
 const LENGTH_RULE = { short:"points มี 1 ข้อ สั้นมาก", mid:"points มี 2-3 ข้อ", long:"points มี 4-5 ข้อ แต่ละข้ออธิบายให้เข้าใจ" };
 
@@ -121,8 +167,8 @@ async function api(path, data = {}){
       const prompt = `คุณคือบรรณาธิการข่าวที่เป็นกลาง ผู้ใช้วางข้อความด้านล่าง ซึ่งอาจมีข่าวหลายชิ้น หัวข่าว ลิงก์ หรือโพสต์ปนกัน
 งานของคุณ: แยกเป็นข่าวทีละเรื่อง (สูงสุด ${total} เรื่อง) รวมข่าวซ้ำเรื่องเดียวกันเป็นเรื่องเดียว แล้วสรุปแต่ละเรื่อง
 ใช้เฉพาะข้อมูลในข้อความที่วาง ห้ามแต่งข้อเท็จจริง ตัวเลข ชื่อ หรือวันที่ที่ไม่มีในข้อความ${fromSearch ? `
-ข้อความนี้เป็นผลค้นหาเว็บ วันนี้คือ ${todayTh()} — ตัดผลที่เป็นข่าวเก่ากว่า${PERIOD_TH[period]}ทิ้ง (ดูวันที่เผยแพร่และเนื้อหา) ตัดหน้าที่ไม่ใช่ข่าว (เช่น วิกิพีเดีย หน้ารวมแท็ก) ทิ้ง
-link ให้ใช้ URL ของผลนั้น source ให้ใช้ชื่อสำนักข่าว (ดูจากชื่อเว็บ) date ให้ใช้วันที่เผยแพร่` : ""}
+ข้อความนี้เป็นรายการข่าวจากฟีดข่าว (กรองช่วงเวลาแล้ว) วันนี้คือ ${todayTh()} — ตัดเฉพาะรายการที่ไม่ใช่ข่าว (เช่น โพสต์โฆษณา หน้ารวมแท็ก) ห้ามตัดข่าวทิ้งทั้งหมด
+link ให้ใช้ URL ของรายการนั้น source ให้ใช้ชื่อสำนักที่ระบุ date ให้ใช้วันที่เผยแพร่` : ""}
 หัวข้อที่ผู้ใช้สนใจ: ${topics.join(", ") || "-"} — ใส่ topic เป็นหนึ่งในหัวข้อนี้ ถ้าไม่เข้ากับหัวข้อไหนให้ใส่ "อื่นๆ"
 ${langLine(p)}
 ตอบเป็น JSON เท่านั้น:
