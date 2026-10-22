@@ -47,6 +47,8 @@ export default {
         case "/login": return json({ user, prefs: await getPrefs(env, user) });
         case "/prefs/save": return json({ prefs: await savePrefs(env, user, body.prefs) });
         case "/news": return json(await newsFeed(env, user, body));
+        case "/edition": return json(await edition(env, user, body));
+        case "/edition/list": return json({ editions: await getJSON(env, `edlist:${user}`, []) });
         case "/recommend": return json(await recommend(env, user, body));
         case "/follow/list": return json({ follows: await getFollows(env, user) });
         case "/follow/add": return json({ follows: await addFollow(env, user, body.q) });
@@ -423,6 +425,28 @@ ${listText}`;
     }),
   };
   await putJSON(env, key, out, 1800);
+  return out;
+}
+
+/* ---------------- ฉบับเช้า / ฉบับเย็น ---------------- */
+
+async function edition(env, user, body) {
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(body.date || "") ? body.date : today();
+  const slot = body.slot === "pm" ? "pm" : "am";
+  const key = `ed:${user}:${date}:${slot}`;
+  if (!body.refresh) {
+    const saved = await getJSON(env, key, null);
+    if (saved) return saved;
+    if (!body.current) throw new Error("ไม่มีฉบับนี้ในคลัง");
+  }
+  const prefs = await getPrefs(env, user);
+  const feed = await newsFeed(env, user, { topics: prefs.topics, period: "1d", length: prefs.length, refresh: !!body.refresh });
+  const out = { ...feed, date, slot, created: new Date().toISOString() };
+  delete out.cached;
+  await putJSON(env, key, out, 15 * 86400);
+  const list = (await getJSON(env, `edlist:${user}`, [])).filter(x => x.key !== `${date}:${slot}`);
+  list.unshift({ key: `${date}:${slot}`, created: out.created, count: out.items.length });
+  await putJSON(env, `edlist:${user}`, list.slice(0, 30));
   return out;
 }
 
